@@ -12,7 +12,7 @@
 ## 🚀 Live Demo
 
 🌐 **Project Website**
-https://koyyadarohith.github.io/Malicious-IP-Intelligence-System/
+https://malicious-ip-intelligence-system.onrender.com/
 
 📂 **Source Code**
 https://github.com/KoyyadaRohith/Malicious-IP-Intelligence-System
