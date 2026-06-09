@@ -1,240 +1,291 @@
 # 🛡️ Malicious IP Intelligence System
 
-Threat Intelligence & IP Reputation Analysis Web Platform
+### 🌐 Threat Intelligence & IP Reputation Analysis Platform
+
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![Flask](https://img.shields.io/badge/Flask-Web%20Framework-green)
+![Cybersecurity](https://img.shields.io/badge/Cybersecurity-Threat%20Intelligence-red)
+![Status](https://img.shields.io/badge/Status-Active-success)
 
 ---
 
-## Overview
-The **Malicious IP Intelligence System** is a web-based console that helps analysts investigate **IPv4 addresses** using aggregated threat intelligence.
+## 📖 Overview
 
-It supports:
-- **Single IP investigation** (score + classification + analyst-style diagnosis + playbook)
-- **Bulk ingestion** of `.csv`, `.txt`, and `.log` files (extract IPv4s → deduplicate → analyze)
-- **Cache-first intelligence** with TTL to reduce repeated vendor queries
-- **Watchlist** and **investigation history**
-- **Report exports** (TXT, CSV, and print-optimized HTML for PDF)
+The **Malicious IP Intelligence System** is a cybersecurity-focused web platform that enables analysts, researchers, and security teams to investigate **IPv4 addresses** using aggregated threat intelligence from multiple sources.
 
-> The app runs out-of-the-box in **Mock Mode** (deterministic data, no API keys required). Switch to **Live Mode** for real vendor lookups.
+### ✨ Key Capabilities
+
+🔍 **Single IP Investigation**
+
+* Risk Score Analysis
+* Threat Classification
+* Analyst-Style Diagnosis
+* Recommended Response Playbooks
+
+📂 **Bulk IP Analysis**
+
+* Upload `.csv`, `.txt`, and `.log` files
+* Automatic IPv4 Extraction
+* Deduplication Engine
+* Batch Threat Intelligence Analysis
+
+⚡ **Intelligence Caching**
+
+* Cache-First Threat Intelligence Retrieval
+* 24-Hour TTL
+* Reduced Vendor API Calls
+* Faster Investigations
+
+📊 **Security Operations Features**
+
+* Watchlist Management
+* Investigation History
+* Threat Analytics Dashboard
+* Report Generation & Export
+
+📄 **Reporting**
+
+* TXT Reports
+* CSV Exports
+* Print-Optimized HTML/PDF Reports
+
+> 🚀 Runs out-of-the-box in **Mock Mode** (No API Keys Required). Switch to **Live Mode** for real-time intelligence from VirusTotal and AbuseIPDB.
 
 ---
 
-## Screens (High-level)
-- Landing page (public)
-- Login/Register (local) + Google OAuth (real or mock consent)
-- Dashboard (stats + trends)
-- Threat Analytics (breakdown + recent scans)
-- IP Investigation (core console)
-- File Upload + AJAX bulk analysis
-- Results console (batch aggregation)
-- Watchlist management
-- History (search archive)
-- Reports (export gallery)
-- Profile + Settings
+## 🖥️ Screens
+
+* 🏠 Landing Page
+* 🔐 Login & Registration
+* 🔑 Google OAuth Authentication
+* 📊 Dashboard
+* 📈 Threat Analytics
+* 🔍 IP Investigation Console
+* 📂 File Upload & Bulk Analysis
+* 📑 Results Console
+* ⭐ Watchlist Management
+* 🕒 Investigation History
+* 📄 Reports & Exports
+* 👤 Profile & Settings
 
 ---
 
-## Tech Stack
-- **Backend**: Python **Flask** (server-rendered Jinja templates)
-- **HTTP Client**: `requests`
-- **Charts**: Chart.js (front-end JS)
-- **Config**: `python-dotenv` to load `.env`
-- **Data storage**: Flat-file **CSV** database in `database/`
-- **Report generation**: `services/report_generator.py`
+## 🛠️ Tech Stack
+
+### Backend
+
+* 🐍 Python
+* 🌶️ Flask
+
+### Frontend
+
+* 🎨 HTML5
+* 🎨 CSS3
+* ⚡ JavaScript
+* 📊 Chart.js
+
+### APIs & Intelligence Sources
+
+* 🛡️ VirusTotal API
+* 🚨 AbuseIPDB API
+* 🌍 ip-api.com
+
+### Configuration
+
+* ⚙️ python-dotenv
+
+### Storage
+
+* 🗄️ CSV-Based Database
+
+### Reporting
+
+* 📄 Custom Report Generator
 
 ---
 
-## Quick Start (Local)
+## ⚡ Quick Start
 
-### 1) Create a virtual environment
-**Windows (cmd):**
+### 1️⃣ Create Virtual Environment
+
 ```bat
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### 2) Install dependencies
+### 2️⃣ Install Dependencies
+
 ```bat
 pip install -r requirements.txt
 ```
 
-### 3) Run the app
+### 3️⃣ Run Application
+
 ```bat
 python app.py
 ```
 
-Open:
-- `http://localhost:5000`
+🌐 Open:
+
+```text
+http://localhost:5000
+```
 
 ---
 
-## Configuration (.env)
-Create a `.env` file in the project root.
+## 🔐 Threat Intelligence Workflow
 
-### Supported variables
-| Variable | Purpose |
-|---|---|
-| `SECRET_KEY` | Flask session secret (defaults to a safe internal value if omitted) |
-| `PORT` | Port to run Flask on (default: `5000`) |
-| `DEBUG` | Debug mode toggle (default: `True`) |
-| `ABUSEIPDB_API_KEY` | Enables AbuseIPDB Live Mode when present |
-| `VIRUSTOTAL_API_KEY` | Enables VirusTotal Live Mode when present |
-| `GOOGLE_OAUTH_CLIENT_ID` | Enables real Google OAuth flow when present |
-| `GOOGLE_OAUTH_CLIENT_SECRET` | Enables real Google OAuth flow when present |
+### 🗄️ Cache-First Retrieval
 
-### Mock vs Live
-- If API keys are **missing/blank**, the application defaults to **Mock Mode**.
-- If you enable **Live Mode** in Settings but credentials are not available, the app enforces Mock Mode.
+* Cache Location: `database/threat_intel_cache.csv`
+* Cache TTL: **24 Hours**
+* Automatic Refresh on Expiration
+* Consistent Results for Repeated Investigations
 
----
+### 🧪 Mock Mode
 
-## How Threat Intelligence Works
+* No API Keys Required
+* Deterministic Threat Intelligence
+* Consistent Output for Testing
 
-### 1) Cache-first fetch (TTL)
-All intelligence retrieval goes through `services/threat_intel_cache.py`.
-- Cache location: `database/threat_intel_cache.csv`
-- Default TTL: **24 hours**
-- Each IP is stored with JSON blobs for:
-  - AbuseIPDB results
-  - VirusTotal results
-  - ip-api.com results
-  - computed risk score + classification
+### 🌍 Live Mode
 
-### 2) Mock Mode
-Mock Mode generates **deterministic** vendor-like data seeded by the target IP, so the same IP produces the same output.
+Real-Time Intelligence Sources:
 
-### 3) Live Mode
-Live Mode queries (when keys are present):
-- **AbuseIPDB**: abuse reputation score
-- **VirusTotal v3**: AV engine detections + tags
-- **ip-api.com**: WHOIS/geo/ISP metadata
-
-If a vendor lookup fails, the system falls back to mock data for that vendor.
+* 🛡️ VirusTotal
+* 🚨 AbuseIPDB
+* 🌐 ip-api.com
 
 ---
 
-## Risk Scoring & Classification
+## 🎯 Risk Scoring & Classification
 
-Implemented in `services/risk_scoring.py`.
+### Risk Score (0–100)
 
-### Score (0–100)
-The system computes an aggregate score using weighted contributions:
+| Source                   | Weight |
+| ------------------------ | ------ |
+| 🚨 AbuseIPDB             | 50%    |
+| 🛡️ VirusTotal           | 35%    |
+| 🌐 Hosting / VPN Profile | 15%    |
 
-- **AbuseIPDB contribution (50%)**
-- **VirusTotal ratio contribution (35%)**
-  - Uses `malicious_count / total_engines` scaled to 0–100
-  - VT contribution is capped at **35**
-- **Hosting/VPN profile contribution (15%)**
-  - +8 if `usage_type` indicates Data Center/Hosting
-  - +7 if VT tags include: `vpn`, `proxy`, `tor`, or `anonymous`
+### Threat Classification
 
-### Classification thresholds
-| Risk Score | Classification |
-|---:|---|
-| `0 – 20` | **Safe** |
-| `21 – 60` | **Suspicious** |
-| `61 – 100` | **Malicious** |
-
-The returned payload includes the classification and a breakdown.
+| Risk Score  | Classification |
+| ----------- | -------------- |
+| 🟢 0 – 20   | Safe           |
+| 🟡 21 – 60  | Suspicious     |
+| 🔴 61 – 100 | Malicious      |
 
 ---
 
-## Bulk Ingestion Pipeline
+## 📂 Bulk Analysis Pipeline
 
-Bulk upload triggers an IP extraction + analysis pipeline:
-1. Upload `.csv`, `.txt`, or `.log` via `/file-upload`
-2. Extract IPv4s using regex:
-   - `\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b`
-3. Deduplicate extracted IPs
-4. Analyze each IP through `/api/analyze-single` (AJAX streaming)
-5. Batch results appear in `/results`
-6. Reports can be exported from `/reports`
+1️⃣ Upload `.csv`, `.txt`, or `.log`
+
+2️⃣ Extract IPv4 Addresses
+
+3️⃣ Remove Duplicates
+
+4️⃣ Analyze Threat Intelligence
+
+5️⃣ Aggregate Results
+
+6️⃣ Generate Reports
 
 ---
 
-## Watchlist & History
+## ⭐ Watchlist & History
 
 ### Watchlist
-- Persistent CSV register: `database/watchlist.csv`
-- Manual add/remove from the investigation UI
-- **Auto-watchlist**: when risk score meets the threshold (default is `75`) the IP is added automatically.
 
-### History
-- Persistent CSV archive: `database/investigation_history.csv`
-- Stores all investigations with metadata including:
-  - risk score
-  - classification
-  - threat summary
-  - vendor-derived fields (as available)
-  - source (`manual` vs batch id)
+* ⭐ Manual Add/Remove
+* 🚨 Auto-Watchlist for High-Risk IPs
+* 💾 Persistent Storage
+
+### Investigation History
+
+* 🕒 Complete Audit Trail
+* 📊 Risk Score Tracking
+* 🔍 Investigation Metadata
 
 ---
 
-## Reports & Exports
-
-Report generation is implemented in `services/report_generator.py` and exported by routes in `app.py`.
+## 📄 Reports & Exports
 
 ### Individual Reports
-- **TXT** (security audit style)
-- **Print-optimized HTML** for the “Save as PDF” workflow
-  - Generated under `reports/pdf/`
+
+* 📄 TXT Security Reports
+* 🖨️ PDF-Ready HTML Reports
 
 ### Bulk Reports
-- **CSV** batch register
-- **TXT** batch ingestion summary
-- **Print-optimized HTML** batch audit (PDF workflow)
 
-### Where exports are stored
-- `reports/pdf/` (HTML print pages)
-- `reports/csv/` (CSV exports)
-- `reports/txt/` (TXT exports)
+* 📊 CSV Exports
+* 📑 TXT Summaries
+* 📄 PDF Audit Reports
 
 ---
 
-## Testing
-
-The repo includes `test_pipeline.py`.
+## 🧪 Testing
 
 Run:
+
 ```bat
 python test_pipeline.py
 ```
 
-It validates core subsystems:
-- User auth & credential hashing
-- Mock threat intelligence + risk scoring pipeline
-- Watchlist CRUD operations
-- Report compilation (TXT/CSV)
+### Validates
+
+✅ Authentication
+
+✅ Threat Intelligence Pipeline
+
+✅ Risk Scoring Engine
+
+✅ Watchlist Operations
+
+✅ Report Generation
 
 ---
 
-## Known Limitations / Notes
-- Supports **IPv4** extraction (IPv6 not implemented).
-- Flat-file CSV storage is optimized for a demo/academic setup, not high concurrency.
-- VirusTotal and AbuseIPDB behavior depends on configured API keys and external availability.
+## ⚠️ Known Limitations
+
+* IPv4 Only
+* CSV Storage Not Designed for High Concurrency
+* External API Availability Affects Live Mode
 
 ---
 
-## Future Enhancements
-- IPv6 support
-- Replace CSV storage with SQLite/PostgreSQL
-- Scheduled background watchlist re-scans + alerts
-- Email/SIEM integrations (CEF/Syslog)
-- Rate limiting + RBAC
-- Map visualization for geo locations
-- Docker deployment
+## 🚀 Future Enhancements
+
+* 🌐 IPv6 Support
+* 🗄️ SQLite / PostgreSQL Migration
+* 🔔 Automated Watchlist Re-Scanning
+* 📧 Email Alerting
+* 📡 SIEM Integration
+* 👥 RBAC Support
+* 🗺️ Geo-Location Mapping
+* 🐳 Docker Deployment
 
 ---
 
-👨‍💻 Developed By
+## 👨‍💻 Developed By
 
-Koyyada Rohith
+### Koyyada Rohith
 
-🔐 Cybersecurity Enthusiast | 🎓 B.Tech CSE | 🚀 Building Projects in Cybersecurity, Collaboration & Technology
+🔐 Cybersecurity Enthusiast
 
-📌 Version
+🎓 B.Tech Computer Science & Engineering
 
-Version 1.0
+🚀 Building Innovative Solutions in Cybersecurity, Threat Intelligence, Collaboration, and Technology
 
-## 📄 License
+---
 
-This project is proprietary software. All rights reserved.
+## 📌 Version
+
+**Version 1.0**
+
+---
+
+## 📜 License
+
+© All Rights Reserved. This project is proprietary software and may not be copied, modified, or distributed without permission.
