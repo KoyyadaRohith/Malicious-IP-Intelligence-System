@@ -1,0 +1,278 @@
+{% extends "base_auth.html" %}
+
+{% block title %}IP Investigation - Malicious IP Intelligence System{% endblock %}
+{% block page_title %}IP Target Investigation{% endblock %}
+{% block page_subtitle %}Query public threat intelligence vectors for IPv4 addresses, retrieve infrastructure data, and classify reputational security risks{% endblock %}
+
+{% block auth_content %}
+<style>
+
+
+
+
+    .results-grid {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 25px;
+        margin-top: 25px;
+    }
+    
+    .gauge-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        text-align: center;
+        height: 100%;
+    }
+    
+    .risk-score-circle {
+        position: relative;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        margin-bottom: 20px;
+        border: 8px solid rgba(255, 255, 255, 0.05);
+        box-shadow: var(--glass-shadow);
+    }
+    
+    .score-num {
+        font-size: 3rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    
+    .score-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        letter-spacing: 0.05em;
+    }
+    
+    .analyst-findings {
+        background: rgba(4, 7, 17, 0.6);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 16px;
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        color: #a5f3fc;
+        line-height: 1.5;
+        border-left: 4px solid var(--primary);
+    }
+    
+    .vendor-pill {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    
+    .vendor-pill:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .info-value {
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-align: right;
+    }
+</style>
+
+<!-- Top Search console bar -->
+<div class="glass-panel" style="padding: 24px;">
+    <form action="{{ url_for('ip_investigation') }}" method="POST" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex-grow: 1; min-width: 250px;">
+            <label for="ip_address" class="form-label">IPv4 Investigation Target</label>
+            <input type="text" id="ip_address" name="ip_address" class="form-control" placeholder="e.g., 8.8.8.8 or 198.51.100.12" value="{{ ip_address or '' }}" required autocomplete="off">
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">
+            <i data-lucide="shield-search"></i> Run Target Diagnostics
+        </button>
+    </form>
+</div>
+
+{% if error %}
+    <div class="glass-panel alert-dismissible animate-fade" style="padding: 20px; border-left: 4px solid var(--color-malicious); margin-top: 25px; display: flex; align-items: center; gap: 15px;">
+        <i data-lucide="alert-triangle" style="color: var(--color-malicious); width: 24px; height: 24px;"></i>
+        <div>
+            <h4 style="color: var(--color-malicious)">Input Validation Error</h4>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">{{ error }}</p>
+        </div>
+    </div>
+{% endif %}
+
+{% if details %}
+    <!-- Detailed Investigation Report Dashboard -->
+    <div class="results-grid">
+        
+        <!-- Left Side: Score card & Recommendations -->
+        <div style="display: flex; flex-direction: column; gap: 25px;">
+            <!-- Risk Scoring dial -->
+
+            <div class="glass-panel gauge-wrapper">
+                <h3 style="font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 20px;">Threat Score Profile</h3>
+                
+                <div class="risk-score-circle" style="
+                    border-color: {% if details.risk.classification == 'Safe' %}rgba(16, 185, 129, 0.1){% elif details.risk.classification == 'Suspicious' %}rgba(245, 158, 11, 0.1){% else %}rgba(255, 0, 85, 0.1){% endif %};
+                    box-shadow: inset 0 0 20px {% if details.risk.classification == 'Safe' %}var(--color-safe-glow){% elif details.risk.classification == 'Suspicious' %}var(--color-suspicious-glow){% else %}var(--color-malicious-glow){% endif %};
+                ">
+                    <span class="score-num" style="color: {% if details.risk.classification == 'Safe' %}var(--color-safe){% elif details.risk.classification == 'Suspicious' %}var(--color-suspicious){% else %}var(--color-malicious){% endif %};">
+                        {{ details.risk.score }}
+                    </span>
+                    <span class="score-label">Risk index</span>
+                </div>
+                
+                <span class="badge {% if details.risk.classification == 'Safe' %}badge-safe{% elif details.risk.classification == 'Suspicious' %}badge-suspicious{% else %}badge-malicious{% endif %}" style="font-size: 0.9rem; padding: 6px 16px;">
+                    {{ details.risk.classification }}
+                </span>
+                
+                <div style="margin-top: 25px; text-align: left; width: 100%;">
+
+                    <h4 style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px;">Cache & Freshness</h4>
+                    <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 14px;">
+                        Last Updated: {{ intel_meta.last_updated_utc if intel_meta and intel_meta.last_updated_utc else 'N/A' }}
+                        <br>
+                        Source: {{ intel_meta.source_status if intel_meta and intel_meta.source_status else 'N/A' }}
+                        <br>
+                        Cache Age: {{ intel_meta.cache_age_hours if intel_meta and intel_meta.cache_age_hours is not none else 'N/A' }}h
+                    </div>
+
+                    <h4 style="font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px;">Actions</h4>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        {% if not is_watched %}
+
+                            <form action="{{ url_for('watchlist_add') }}" method="POST" style="flex-grow: 1;">
+                                <input type="hidden" name="ip" value="{{ details.ip }}">
+                                <input type="hidden" name="risk_score" value="{{ details.risk.score }}">
+                                <input type="hidden" name="classification" value="{{ details.risk.classification }}">
+                                <input type="hidden" name="reason" value="Threat Search Panel Investigation">
+                                <button type="submit" class="btn btn-secondary" style="width: 100%; font-size: 0.8rem; padding: 8px;">
+                                    <i data-lucide="eye" style="width: 14px; height: 14px;"></i> Watchlist
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('watchlist_delete') }}" method="POST" style="flex-grow: 1;">
+                                <input type="hidden" name="ip" value="{{ details.ip }}">
+                                <button type="submit" class="btn btn-outline-primary" style="width: 100%; font-size: 0.8rem; padding: 8px;">
+                                    <i data-lucide="eye-off" style="width: 14px; height: 14px;"></i> Unwatch
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <button onclick="window.print();" class="btn btn-primary" style="flex-grow: 1; font-size: 0.8rem; padding: 8px;">
+
+                            <i data-lucide="printer" style="width: 14px; height: 14px;"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recommendations Section -->
+            <div class="glass-panel" style="padding: 24px;">
+                <h3 style="font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 15px;">Remediation Playbook</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    {% for rec in details.recommendations %}
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 6px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <strong style="font-size: 0.9rem;">{{ rec.action }}</strong>
+                                <span class="badge" style="
+                                    font-size: 0.65rem;
+                                    padding: 2px 6px;
+                                    background: {% if rec.priority == 'High' %}rgba(255,0,85,0.1){% else %}rgba(255,255,255,0.05){% endif %};
+                                    color: {% if rec.priority == 'High' %}var(--color-malicious){% else %}var(--text-secondary){% endif %};
+                                    border-color: {% if rec.priority == 'High' %}rgba(255,0,85,0.2){% else %}rgba(255,255,255,0.1){% endif %};
+                                ">{{ rec.priority }} Priority</span>
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">{{ rec.description }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Side: Detailed telemetry vendor cards -->
+        <div style="display: flex; flex-direction: column; gap: 25px;">
+            <!-- Findings Summary -->
+            <div class="glass-panel" style="padding: 24px;">
+                <h3 style="font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 15px;">Analyst Diagnosis</h3>
+                <div class="analyst-findings">
+                    <span style="color: var(--primary); font-weight: bold;">[ANALYST-FINDINGS]</span> {{ details.summary }}
+                </div>
+            </div>
+            
+            <!-- Infrastructure details -->
+            <div class="glass-panel" style="padding: 24px;">
+                <h3 style="font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 15px;">Infrastructure Profile</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="vendor-pill"><span class="info-label">ISP Network</span><span class="info-value">{{ details.whois.isp }}</span></div>
+                    <div class="vendor-pill"><span class="info-label">ASN Target</span><span class="info-value">{{ details.whois.asn }}</span></div>
+                    <div class="vendor-pill"><span class="info-label">Org Owner</span><span class="info-value">{{ details.whois.org }}</span></div>
+                    <div class="vendor-pill"><span class="info-label">Country</span><span class="info-value">{{ details.whois.country }} ({{ details.whois.country_code }})</span></div>
+                    <div class="vendor-pill"><span class="info-label">Coordinates</span><span class="info-value" style="font-family: var(--font-mono); font-size: 0.8rem;">{{ details.whois.latitude }}, {{ details.whois.longitude }}</span></div>
+                    <div class="vendor-pill"><span class="info-label">Timezone</span><span class="info-value">{{ details.whois.timezone }}</span></div>
+                    <div class="vendor-pill"><span class="info-label">First Seen</span><span class="info-value" style="font-family: var(--font-mono); font-size: 0.8rem;">{{ details.whois.created_date }}</span></div>
+                    <div class="vendor-pill"><span class="info-label">Last Updated</span><span class="info-value" style="font-family: var(--font-mono); font-size: 0.8rem;">{{ details.whois.updated_date }}</span></div>
+                </div>
+            </div>
+            
+            <!-- Vendor specifics -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <!-- AbuseIPDB -->
+                <div class="glass-panel" style="padding: 20px;">
+                    <h3 style="font-size: 0.95rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="shield-alert" style="color: var(--color-suspicious); width: 18px; height: 18px;"></i>
+                        AbuseIPDB Feed
+                    </h3>
+                    <div class="vendor-pill"><span class="info-label">Abuse Confidence</span><span class="info-value" style="color: {% if details.abuse.abuse_score > 60 %}var(--color-malicious){% elif details.abuse.abuse_score > 20 %}var(--color-suspicious){% else %}var(--color-safe){% endif %};">{{ details.abuse.abuse_score }}%</span></div>
+                    <div class="vendor-pill"><span class="info-label">Total Reports</span><span class="info-value">{{ details.abuse.total_reports }} Scans</span></div>
+                    <div class="vendor-pill"><span class="info-label">Usage Profile</span><span class="info-value" style="font-size: 0.8rem;">{{ details.abuse.usage_type }}</span></div>
+                    <div class="vendor-pill"><span class="info-label">Domain Address</span><span class="info-value" style="font-family: var(--font-mono); font-size: 0.8rem;">{{ details.abuse.domain }}</span></div>
+                </div>
+                
+                <!-- VirusTotal -->
+                <div class="glass-panel" style="padding: 20px;">
+                    <h3 style="font-size: 0.95rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="skull" style="color: var(--color-malicious); width: 18px; height: 18px;"></i>
+                        VirusTotal Telemetry
+                    </h3>
+                    <div class="vendor-pill">
+                        <span class="info-label">Detections</span>
+                        <span class="info-value" style="color: {% if details.vt.malicious_count > 0 %}var(--color-malicious){% else %}var(--color-safe){% endif %};">
+                            {{ details.vt.malicious_count }} / {{ details.vt.total_engines }} Engines
+                        </span>
+                    </div>
+                    <div class="vendor-pill"><span class="info-label">Reputation Score</span><span class="info-value" style="color: {% if details.vt.reputation_score < 0 %}var(--color-malicious){% else %}var(--color-safe){% endif %};">{{ details.vt.reputation_score }}</span></div>
+                    <div class="vendor-pill"><span class="info-label">Subnet Mask</span><span class="info-value" style="font-family: var(--font-mono); font-size: 0.8rem;">{{ details.vt.network }}</span></div>
+                    <div class="vendor-pill">
+                        <span class="info-label">Indicators</span>
+                        <span class="info-value" style="font-size: 0.8rem;">
+                            {% if details.vt.tags %}
+                                {% for tag in details.vt.tags %}
+                                    <span style="font-family: var(--font-mono); background: rgba(255,255,255,0.05); padding: 2px 4px; border-radius: 4px; font-size: 0.65rem;">{{ tag }}</span>
+                                {% endfor %}
+                            {% else %}
+                                None
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+{% endif %}
+
+{% endblock %}

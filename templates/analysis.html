@@ -1,0 +1,172 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Pipeline Processing - Malicious IP Intelligence System{% endblock %}
+{% block page_title %}Security Pipeline Analysis{% endblock %}
+{% block page_subtitle %}Live thread telemetry analysis in progress. Performing diagnostic queries on parsed targets.{% endblock %}
+
+{% block auth_content %}
+<style>
+    .progress-track {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.05);
+        height: 10px;
+        border-radius: 5px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        margin-bottom: 25px;
+    }
+    
+    .progress-fill {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-blue) 0%, var(--primary) 100%);
+        box-shadow: 0 0 10px var(--primary-glow);
+        transition: width 0.3s ease;
+    }
+    
+    .analysis-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+</style>
+
+<div class="analysis-layout">
+    <div class="glass-panel" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="font-weight: 600; font-size: 0.95rem;" id="progressLabel">Initializing Diagnostic Pipeline...</span>
+            <span style="font-family: var(--font-mono); font-weight: bold; color: var(--primary);" id="progressPercent">0%</span>
+        </div>
+        
+        <div class="progress-track">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+        
+        <h3 style="font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 15px;">Active Console Outputs</h3>
+        <div class="console-panel" id="analysisTerminal" style="height: 350px;">
+            <div class="console-line info">
+                <span class="console-timestamp">[{{ time_now }}]</span>
+                <span>SYSTEM: Pipeline diagnostic engine spun up successfully.</span>
+            </div>
+            <div class="console-line info">
+                <span class="console-timestamp">[{{ time_now }}]</span>
+                <span>SYSTEM: Unique parsed IP nodes located: {{ unique_ips | length }}.</span>
+            </div>
+            <div class="console-line warning">
+                <span class="console-timestamp">[{{ time_now }}]</span>
+                <span>SYSTEM: Commencing batch threat feeds lookup. Do not close this terminal.</span>
+            </div>
+            <div id="liveLogs"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const uniqueIps = {{ unique_ips | tojson }};
+        const batchName = "{{ filename }}";
+        const total = uniqueIps.length;
+        
+        if (total === 0) {
+            appendLog('[ERROR] Parse buffer empty. Aborting pipeline.', 'danger');
+            setTimeout(() => window.location.href = "{{ url_for('file_upload') }}", 2000);
+            return;
+        }
+
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const progressLabel = document.getElementById('progressLabel');
+        const liveLogs = document.getElementById('liveLogs');
+        const terminal = document.getElementById('analysisTerminal');
+        
+        let currentIndex = 0;
+        const results = [];
+
+        function appendLog(message, type = 'info') {
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            const ts = new Date().toLocaleTimeString();
+            line.innerHTML = `<span class="console-timestamp">[${ts}]</span> <span>${message}</span>`;
+            liveLogs.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        async function processNext() {
+            if (currentIndex >= total) {
+                // Done! Save bulk session
+                progressLabel.textContent = "Compiling bulk diagnostic reports...";
+                appendLog('[INFO] Ingestion lookup stage complete. Finalizing database operations...', 'info');
+                
+                try {
+                    const saveResponse = await fetch("{{ url_for('save_bulk_session') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            filename: batchName,
+                            results: results
+                        })
+                    });
+                    
+                    if (saveResponse.ok) {
+                        const responseData = await saveResponse.json();
+                        appendLog('[SUCCESS] Report compiled successfully. Diverting to results console.', 'success');
+                        setTimeout(() => {
+                            window.location.href = `/results?batch_id=${responseData.batch_id}`;
+                        }, 1500);
+                    } else {
+                        appendLog('[ERROR] Save operations failed. Database lock error.', 'danger');
+                    }
+                } catch (err) {
+                    appendLog('[ERROR] Pipeline failure during report compilation: ' + err, 'danger');
+                }
+                return;
+            }
+
+            const currentIp = uniqueIps[currentIndex];
+            progressLabel.textContent = `Analyzing nodes (${currentIndex + 1}/${total}): ${currentIp}`;
+            appendLog(`[QUERY] Fetching threat vectors for IP target: ${currentIp}...`, 'info');
+
+            try {
+                const response = await fetch(`/api/analyze-single?ip=${currentIp}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    results.push(data);
+                    
+                    // Add details to logs based on classification
+                    let lineClass = 'info';
+                    if (data.classification === 'Suspicious') lineClass = 'warning';
+                    if (data.classification === 'Malicious') lineClass = 'danger';
+                    
+                    appendLog(`[RESULT] ${currentIp} -> Class: ${data.classification} | Score: ${data.risk_score}/100 | ISP: ${data.isp}`, lineClass);
+                } else {
+                    appendLog(`[WARNING] Failed connection to threat APIs for ${currentIp}. Using standard safety defaults.`, 'warning');
+                    results.push({
+                        ip: currentIp,
+                        risk_score: 0,
+                        classification: 'Safe',
+                        country: 'Unknown',
+                        isp: 'Unknown Network',
+                        asn: 'Unknown'
+                    });
+                }
+            } catch (err) {
+                appendLog(`[ERROR] Network timeout or lookup failure on node ${currentIp}: ${err}`, 'danger');
+            }
+
+            // Update bar
+            currentIndex++;
+            const percent = Math.round((currentIndex / total) * 100);
+            progressBar.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
+
+            // Yield control back to browser to allow animation rendering before next iteration
+            setTimeout(processNext, 100);
+        }
+
+        // Commences lookup pipeline loop
+        setTimeout(processNext, 1000);
+    });
+</script>
+{% endblock %}

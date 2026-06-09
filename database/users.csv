@@ -1,0 +1,2 @@
+username,email,password_hash,full_name,mobile_number,location,created_at,bio,role,organization,profile_photo_url,provider,account_created_date
+koyyada_rohith,koyyadarohith25@gmail.com,35dd5583403d776242e820c0398d98ec38a3085408b199efb188c7f279109d65,Koyyada Rohith,+917660922848,"Hyderabad, Telangana, India",2026-06-03T22:49:26.680851,"Cybersecurity Enthusiast | SOC in Training | B.Tech CSE | Passionate about Network Security, Generative AI Tools | Building Cyber Black World",SOC Analyst,Edufyi Tech Solutions,,local,2026-06-03T22:49:26.680851

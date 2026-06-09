@@ -1,0 +1,113 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Bulk Ingestion - Malicious IP Intelligence System{% endblock %}
+{% block page_title %}Bulk Log File Ingestion{% endblock %}
+{% block page_subtitle %}Incorporate system firewall dumps, CSV logs, or raw TXT dumps to batch analyze reputation indices{% endblock %}
+
+{% block auth_content %}
+<style>
+    .upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 40px 20px;
+        text-align: center;
+        background: var(--bg-surface);
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .upload-zone:hover, .upload-zone.highlight {
+        border-color: var(--primary);
+        background: rgba(0, 240, 255, 0.03);
+    }
+    
+    .upload-icon {
+        color: var(--text-muted);
+        transition: all 0.3s;
+    }
+    
+    .upload-zone:hover .upload-icon {
+        color: var(--primary);
+        transform: translateY(-5px);
+        filter: drop-shadow(0 0 10px var(--primary-glow));
+    }
+</style>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+    <!-- Ingestion module drag/drop -->
+    <div style="display: flex; flex-direction: column; gap: 25px;">
+        <div class="glass-panel" style="padding: 24px;">
+            <h3 style="font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 20px;">Upload Files</h3>
+            
+            <form id="uploadForm" action="{{ url_for('file_upload') }}" method="POST" enctype="multipart/form-data">
+                <div class="upload-zone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                    <i data-lucide="upload-cloud" class="upload-icon" style="width: 48px; height: 48px;"></i>
+                    <div>
+                        <h4 id="dropzoneText">Drag and drop file here</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Supports .csv, .txt, and .log files (Max 10MB)</p>
+                    </div>
+                    <input type="file" id="fileInput" name="file" style="display: none;" accept=".csv,.txt,.log">
+                </div>
+                
+                <!-- Display file loaded info -->
+                <div class="glass-panel" id="fileDetails" style="display: none; padding: 16px; margin-top: 20px; background: rgba(0, 240, 255, 0.02); border-color: rgba(0, 240, 255, 0.1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="file-check" style="color: var(--primary);"></i>
+                            <div>
+                                <strong id="fileName" style="font-size: 0.9rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">log_dump.log</strong>
+                                <span id="fileSize" style="font-size: 0.8rem; color: var(--text-muted);">24.5 KB</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" style="padding: 4px 8px; font-size: 0.75rem;" onclick="location.reload()">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 25px;">
+                    <button type="submit" id="btnSubmit" class="btn btn-primary" style="width: 100%; padding: 12px;" disabled>
+                        <i data-lucide="terminal"></i> Run Ingestion Pipeline
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Quick guide info -->
+        <div class="glass-panel" style="padding: 24px;">
+            <h3 style="font-size: 0.95rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 12px;">Ingestion Specifications</h3>
+            <ul style="padding-left: 20px; font-size: 0.85rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
+                <li>The parser automatically scans unstructured raw txt or log files for standard IPv4 address regex matches.</li>
+                <li>Duplicated target IP rows are automatically scrubbed to reduce API quota consumption.</li>
+                <li>Upload structure of CSVs should ideally feature an <code>ip</code> or <code>address</code> column, but the engine will extract valid IPs from any file column.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Right side: Analyst terminal logs -->
+    <div class="glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+            <h3 style="font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 15px;">Pipeline Diagnostic Terminal</h3>
+            <div id="uploadTerminal" class="console-panel" style="height: 380px;">
+                <div class="console-line info">
+                    <span class="console-timestamp">[{{ time_now }}]</span>
+                    <span>SYSTEM: Pipeline initialized. Awaiting file feed...</span>
+                </div>
+                <div id="terminalLogs"></div>
+            </div>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; text-align: center; font-family: var(--font-mono)">
+            SECURE-THREAT-LOG-PARSER // v1.2.0
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}

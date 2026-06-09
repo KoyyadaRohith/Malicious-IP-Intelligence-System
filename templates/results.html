@@ -1,0 +1,166 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Investigation Results - Malicious IP Intelligence System{% endblock %}
+{% block page_title %}Bulk Diagnostic Report{% endblock %}
+{% block page_subtitle %}Aggregated metrics, infrastructure profiles, and detailed logs for file batch: {{ file_metadata.filename }}{% endblock %}
+
+{% block page_actions %}
+<div style="display: flex; gap: 10px;">
+    <a href="{{ url_for('download_report', report_id='bulk_' ~ batch_id ~ '_csv') }}" class="btn btn-primary">
+        <i data-lucide="download"></i> Export CSV Dataset
+    </a>
+    <a href="{{ url_for('download_report', report_id='bulk_' ~ batch_id ~ '_txt') }}" class="btn btn-primary">
+        <i data-lucide="file-down"></i> Export TXT Logs
+    </a>
+    <button onclick="window.print();" class="btn btn-primary">
+        <i data-lucide="printer"></i> Export PDF Report
+    </button>
+</div>
+{% endblock %}
+
+{% block auth_content %}
+<!-- Overview Stats Row -->
+<div class="widget-grid">
+    <div class="glass-panel metric-card primary">
+        <div class="metric-header">
+            <span class="metric-title">Ingested IPs</span>
+            <i data-lucide="file-spreadsheet" class="metric-icon"></i>
+        </div>
+        <div class="metric-value">{{ stats.total }}</div>
+    </div>
+    
+    <div class="glass-panel metric-card safe">
+        <div class="metric-header">
+            <span class="metric-title">Safe Nodes</span>
+            <i data-lucide="shield-check" class="metric-icon"></i>
+        </div>
+        <div class="metric-value">{{ stats.safe }}</div>
+    </div>
+    
+    <div class="glass-panel metric-card suspicious">
+        <div class="metric-header">
+            <span class="metric-title">Suspicious Nodes</span>
+            <i data-lucide="alert-triangle" class="metric-icon"></i>
+        </div>
+        <div class="metric-value">{{ stats.suspicious }}</div>
+    </div>
+    
+    <div class="glass-panel metric-card malicious">
+        <div class="metric-header">
+            <span class="metric-title">Malicious Nodes</span>
+            <i data-lucide="skull" class="metric-icon"></i>
+        </div>
+        <div class="metric-value">{{ stats.malicious }}</div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <!-- List of parsed items with search/filter -->
+    <div class="glass-panel" style="padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <h3 class="chart-title" style="margin-bottom: 0;">
+                <i data-lucide="list-tree" style="color: var(--primary);"></i>
+                Batch Node Directory
+            </h3>
+            
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="tableSearch" class="form-control" placeholder="Search node IP..." style="width: 200px; padding: 6px 12px; font-size: 0.85rem;">
+                <select id="tableFilter" class="form-control" style="width: 130px; padding: 6px 12px; font-size: 0.85rem;">
+                    <option value="">All Threats</option>
+                    <option value="Safe">Safe</option>
+                    <option value="Suspicious">Suspicious</option>
+                    <option value="Malicious">Malicious</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>IP Target</th>
+                        <th>Country</th>
+                        <th>ISP Network</th>
+                        <th>Threat Score</th>
+                        <th>Classification</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in results %}
+                        <tr>
+                            <td style="font-family: var(--font-mono); font-weight: 600;">{{ row.ip }}</td>
+                            <td>{{ row.country }}</td>
+                            <td style="font-size: 0.85rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                {{ row.isp }}
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 50px; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; overflow: hidden;">
+                                        <div style="width: {{ row.risk_score }}%; height: 100%; background: {% if row.classification == 'Safe' %}var(--color-safe){% elif row.classification == 'Suspicious' %}var(--color-suspicious){% else %}var(--color-malicious){% endif %};"></div>
+                                    </div>
+                                    <span style="font-family: var(--font-mono); font-size: 0.8rem;">{{ row.risk_score }}/100</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if row.classification == 'Safe' %}badge-safe{% elif row.classification == 'Suspicious' %}badge-suspicious{% else %}badge-malicious{% endif %}">
+                                    {{ row.classification }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('ip_investigation') }}?ip_address={{ row.ip }}" class="btn btn-outline-primary" style="padding: 4px 8px; font-size: 0.75rem;">
+                                    <i data-lucide="eye" style="width: 12px; height: 12px;"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Distribution chart and recommendations summary -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="glass-panel chart-card">
+            <h3 class="chart-title">
+                <i data-lucide="pie-chart" style="color: var(--accent-indigo);"></i>
+                Threat Ratios
+            </h3>
+            <div class="chart-wrapper">
+                <canvas id="threatDistributionChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="glass-panel" style="padding: 24px;">
+            <h3 style="font-size: 0.95rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 15px;">Security Recommendations</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;">
+                <div style="border-left: 3px solid var(--color-malicious); padding-left: 10px; margin-bottom: 10px;">
+                    <strong>Malicious Blocks Required</strong>
+                    <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 2px;">
+                        Configure firewalls to block all traffic containing the {{ stats.malicious }} malicious IPs detected.
+                    </p>
+                </div>
+                <div style="border-left: 3px solid var(--color-suspicious); padding-left: 10px;">
+                    <strong>Suspicious Auditing Required</strong>
+                    <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 2px;">
+                        Add the {{ stats.suspicious }} suspicious IPs to watchlists and audit web requests logs.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Ingress chart datasets
+    window.threatDistributionData = {
+        safe: {{ stats.safe }},
+        suspicious: {{ stats.suspicious }},
+        malicious: {{ stats.malicious }}
+    };
+</script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,376 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Profile - Malicious IP Intelligence System{% endblock %}
+{% block page_title %}Profile{% endblock %}
+{% block page_subtitle %}Manage your account details and profile information{% endblock %}
+
+{% block auth_content %}
+<div class="profile-container" style="display: grid; grid-template-columns: 1fr 2.2fr; gap: 30px;">
+    <div class="glass-panel" style="padding: 40px 30px; text-align: center; position: relative; overflow: hidden; transition: box-shadow 0.3s ease;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: linear-gradient(90deg, var(--accent-blue) 0%, var(--primary) 100%);"></div>
+
+        <div class="profile-avatar-container" style="position: relative; width: 120px; height: 120px; margin: 0 auto 20px;">
+            <div class="profile-avatar" style="width: 100%; height: 100%; border-radius: 50%; font-size: 3rem; font-weight: 700; display: flex; align-items: center; justify-content: center; background: rgba(0, 240, 255, 0.08); border: 2px solid var(--border-color); box-shadow: 0 0 40px rgba(0, 240, 255, 0.08); color: var(--primary); text-transform: uppercase; overflow: hidden; transition: transform 0.3s ease;">
+                {% if global_avatar_url %}
+                    <img id="profile_avatar_img" src="{{ global_avatar_url }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar">
+                {% else %}
+                    <span id="card_avatar_letter">{{ user.full_name[0] | upper if user.full_name else 'U' }}</span>
+                {% endif %}
+            </div>
+            <label for="avatarUpload" class="avatar-edit-overlay" style="position: absolute; bottom: 0; right: 0; width: 34px; height: 34px; border-radius: 50%; background: var(--bg-surface-opaque); border: 1.5px solid var(--primary); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 10px rgba(0, 240, 255, 0.35); transition: all 0.3s ease;" title="Change Profile Photo">
+                <i data-lucide="camera" style="width: 16px; height: 16px; color: var(--primary);"></i>
+            </label>
+            <input type="file" id="avatarUpload" accept=".jpg,.jpeg,.png" style="display: none;">
+        </div>
+
+        <h3 id="card_full_name" style="font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">{{ user.full_name }}</h3>
+        <p id="card_username" style="color: var(--primary); font-size: 0.95rem; font-weight: 600; letter-spacing: 0.08em; margin-bottom: 12px;">@{{ user.username }}</p>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 18px;">Threat Intelligence and IP Reputation Analysis Platform</p>
+
+        <div style="display: grid; gap: 12px; text-align: left; padding: 0 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <span style="font-size: 0.82rem; color: var(--text-primary); font-weight: 700;">Role</span>
+                <span id="display_role_left" style="font-size: 0.92rem; color: var(--text-secondary); font-weight: 500;">{{ user.role or 'Threat Analyst' }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <span style="font-size: 0.82rem; color: var(--text-primary); font-weight: 700;">Organization</span>
+                <span id="display_organization_left" style="font-size: 0.92rem; color: var(--text-secondary); font-weight: 500;">{{ user.organization or 'Malicious IP Intelligence System' }}</span>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 24px 0;">
+
+        <div style="text-align: left; padding: 0 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 12px;">
+                <span class="form-label" style="color: var(--text-secondary); font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">BIO</span>
+            </div>
+            <div id="bio_view" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.75; min-height: 100px; white-space: pre-wrap;">{{ user.bio or 'No bio provided.' }}</div>
+            <textarea id="edit_bio" name="bio" class="profile-field-input hidden" style="width: 100%; min-height: 120px; resize: vertical; margin-top: 12px; padding: 14px; font-size: 0.95rem; border-radius: 14px; border: 1px solid transparent; color: var(--text-primary); background: rgba(255,255,255,0.02);" placeholder="Cybersecurity enthusiast focused on Threat Intelligence, Network Security, and Digital Forensics.">{{ user.bio or '' }}</textarea>
+        </div>
+    </div>
+
+    <div class="glass-panel" style="padding: 38px 36px; display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: box-shadow 0.3s ease;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; gap: 16px;">
+            <h2 style="font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-primary); margin: 0;">Profile Details</h2>
+            <button type="button" id="editIconBtn" class="btn btn-secondary profile-edit-button" title="Edit Profile" style="border-radius: 50%; width: 46px; height: 46px; display: inline-flex; align-items: center; justify-content: center; background: var(--bg-surface-opaque); border: 1px solid var(--border-color); color: var(--text-primary); box-shadow: var(--glass-shadow); font-size: 20px;">
+                ✎
+            </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <span class="form-label" style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500;">Full Name</span>
+                <span id="display_full_name" class="profile-field-value" style="color: var(--text-secondary);">{{ user.full_name }}</span>
+                <input type="text" id="input_full_name" class="profile-field-input hidden" value="{{ user.full_name }}" readonly>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <span class="form-label" style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500;">Username</span>
+                <span id="display_username" class="profile-field-value" style="color: var(--text-secondary);">{{ user.username }}</span>
+                <input type="text" id="input_username" class="profile-field-input hidden" value="{{ user.username }}" readonly>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <span class="form-label" style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500;">Email Address</span>
+                <span id="display_email" class="profile-field-value" style="color: var(--text-secondary);">{{ user.email }}</span>
+                <input type="email" id="input_email" class="profile-field-input hidden" value="{{ user.email }}" readonly>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <span class="form-label" style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500;">Location</span>
+                <span id="display_location" class="profile-field-value" style="color: var(--text-secondary);">{{ user.location or 'Hyderabad, Telangana, India' }}</span>
+                <input type="text" id="input_location" class="profile-field-input hidden" value="{{ user.location or 'Hyderabad, Telangana, India' }}" readonly>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <span class="form-label" style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500;">Role</span>
+                <span id="display_role_right" class="profile-field-value" style="color: var(--text-secondary);">{{ user.role or 'Threat Analyst' }}</span>
+                <input type="text" id="input_role" class="profile-field-input hidden" value="{{ user.role or 'Threat Analyst' }}" readonly>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <span class="form-label" style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500;">Organization</span>
+                <span id="display_organization_right" class="profile-field-value" style="color: var(--text-secondary);">{{ user.organization or 'Malicious IP Intelligence System' }}</span>
+                <input type="text" id="input_organization" class="profile-field-input hidden" value="{{ user.organization or 'Malicious IP Intelligence System' }}" readonly>
+            </div>
+
+            <div style="grid-column: span 2; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 6px;">
+                <div style="flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 6px;">
+                    <span class="form-label" style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; text-transform: uppercase;">Member Since</span>
+                    <span style="color: var(--text-muted); font-size: 0.95rem;">{{ member_since }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 36px; border-top: 1px solid var(--border-color); padding-top: 24px; flex-wrap: wrap;">
+            <button type="button" id="saveBtn" class="btn btn-primary" style="display: none; min-width: 150px;">
+                <i data-lucide="save" style="width: 16px; height: 16px;"></i> Save Changes
+            </button>
+            <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none; min-width: 150px;">
+                <i data-lucide="x" style="width: 16px; height: 16px;"></i> Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hidden { display: none !important; }
+    .profile-field-input {
+        width: 100%;
+        min-height: 46px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        background: rgba(255,255,255,0.02);
+        color: var(--text-primary);
+        transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+    .profile-field-input:not([readonly]) {
+        border-color: rgba(56, 189, 248, 0.32);
+        background: rgba(255,255,255,0.05);
+        box-shadow: 0 0 18px rgba(56, 189, 248, 0.12);
+    }
+    .profile-field-input:not([readonly]):focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(255,255,255,0.08);
+    }
+    
+    /* Light theme inputs background overrides */
+    [data-theme="light"] .profile-field-input {
+        background: var(--bg-input);
+        border-color: var(--border-color);
+    }
+    [data-theme="light"] .profile-field-input:not([readonly]) {
+        background: var(--bg-input);
+        border-color: var(--primary);
+        box-shadow: 0 0 10px var(--primary-glow);
+    }
+    [data-theme="light"] .profile-field-input:not([readonly]):focus {
+        background: var(--bg-input);
+        border-color: var(--primary-hover);
+        box-shadow: 0 0 15px var(--primary-glow);
+    }
+    .profile-field-value {
+        color: var(--text-secondary);
+        font-size: 0.98rem;
+        line-height: 1.6;
+        word-break: break-word;
+    }
+    .profile-edit-button,
+    .profile-edit-small {
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .profile-edit-button:hover,
+    .profile-edit-small:hover {
+        transform: translateY(-1px) scale(1.04);
+        background: var(--bg-surface-hover);
+        border-color: var(--primary);
+        box-shadow: var(--glass-shadow), 0 0 15px var(--primary-glow);
+    }
+    .glass-panel:hover {
+        transform: translateY(-1px);
+    }
+    @media (max-width: 1024px) {
+        .profile-container { grid-template-columns: 1fr !important; }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const profileFields = ['full_name', 'username', 'email', 'location', 'role', 'organization'];
+        const fieldInputs = {};
+        const fieldDisplays = {};
+        const bioView = document.getElementById('bio_view');
+        const bioTextarea = document.getElementById('edit_bio');
+        const editIconBtn = document.getElementById('editIconBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const avatarUpload = document.getElementById('avatarUpload');
+        const avatarContainer = document.querySelector('.profile-avatar');
+        let pendingAvatarFile = null;
+        let originalAvatarMarkup = avatarContainer ? avatarContainer.innerHTML : '';
+        const originalState = { bio: bioView ? bioView.textContent.trim() : '' };
+
+        profileFields.forEach(field => {
+            fieldInputs[field] = document.getElementById(`input_${field}`);
+            const displayId = ['role', 'organization'].includes(field) ? `display_${field}_right` : `display_${field}`;
+            fieldDisplays[field] = document.getElementById(displayId);
+            if (fieldDisplays[field]) {
+                originalState[field] = fieldDisplays[field].textContent.trim();
+            }
+            if (fieldInputs[field]) {
+                fieldInputs[field].classList.add('hidden');
+            }
+        });
+
+        const setEditMode = (active) => {
+            profileFields.forEach(field => {
+                const display = fieldDisplays[field];
+                const input = fieldInputs[field];
+                if (display) display.classList.toggle('hidden', active);
+                if (input) {
+                    input.classList.toggle('hidden', !active);
+                    if (active) input.removeAttribute('readonly');
+                    else input.setAttribute('readonly', 'true');
+                }
+            });
+            if (bioView) bioView.classList.toggle('hidden', active);
+            if (bioTextarea) bioTextarea.classList.toggle('hidden', !active);
+            if (saveBtn) saveBtn.style.display = active ? 'inline-flex' : 'none';
+            if (cancelBtn) cancelBtn.style.display = active ? 'inline-flex' : 'none';
+            if (active && fieldInputs.full_name) fieldInputs.full_name.focus();
+        };
+
+        const restoreOriginalValues = () => {
+            profileFields.forEach(field => {
+                if (fieldDisplays[field]) fieldDisplays[field].textContent = originalState[field] || '';
+                if (fieldInputs[field]) fieldInputs[field].value = originalState[field] || '';
+            });
+            ['role', 'organization'].forEach(field => {
+                const left = document.getElementById(`display_${field}_left`);
+                if (left) left.textContent = originalState[field] || '';
+            });
+            if (bioView) bioView.textContent = originalState.bio || 'No bio provided.';
+            if (bioTextarea) bioTextarea.value = originalState.bio || '';
+            if (pendingAvatarFile && avatarContainer) {
+                avatarContainer.innerHTML = originalAvatarMarkup;
+                pendingAvatarFile = null;
+            }
+            if (avatarUpload) avatarUpload.value = '';
+        };
+
+        const updateSavedState = (user) => {
+            profileFields.forEach(field => {
+                const value = user[field] || '';
+                if (fieldDisplays[field]) fieldDisplays[field].textContent = value;
+                if (fieldInputs[field]) fieldInputs[field].value = value;
+                originalState[field] = value;
+            });
+            ['role', 'organization'].forEach(field => {
+                const left = document.getElementById(`display_${field}_left`);
+                if (left) left.textContent = user[field] || (field === 'role' ? 'Threat Analyst' : 'Malicious IP Intelligence System');
+            });
+            originalState.bio = user.bio || '';
+            if (bioView) bioView.textContent = originalState.bio || 'No bio provided.';
+            if (bioTextarea) bioTextarea.value = originalState.bio || '';
+        };
+
+        const previewAvatar = (dataUrl) => {
+            if (!avatarContainer) return;
+            avatarContainer.innerHTML = `<img id="profile_avatar_img" src="${dataUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" alt="Avatar">`;
+        };
+
+        const uploadAvatar = async () => {
+            if (!pendingAvatarFile) return null;
+            const formData = new FormData();
+            formData.append('avatar', pendingAvatarFile);
+            const response = await fetch("{{ url_for('upload_avatar') }}", {
+                method: 'POST',
+                body: formData
+            });
+            return response.json();
+        };
+
+        const showToast = (message, type = 'info') => {
+            let flashes = document.querySelector('.flashes');
+            if (!flashes) {
+                flashes = document.createElement('div');
+                flashes.className = 'flashes';
+                flashes.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1000; width: 340px;';
+                document.body.appendChild(flashes);
+            }
+            const toast = document.createElement('div');
+            toast.className = 'glass-panel alert-dismissible';
+            const borderColor = type === 'error' ? 'var(--color-malicious)' : (type === 'info' ? 'var(--primary)' : 'var(--color-safe)');
+            const iconName = type === 'error' ? 'alert-circle' : (type === 'info' ? 'info' : 'check-circle');
+            toast.style.cssText = `padding: 16px; margin-bottom: 10px; border-left: 4px solid ${borderColor}; display: flex; align-items: center; gap: 10px; opacity: 1; transition: opacity 0.4s ease;`;
+            toast.innerHTML = `<i data-lucide="${iconName}" style="color: ${borderColor}; width: 18px; height: 18px;"></i><div style="font-size: 0.9rem; color: var(--text-primary);">${message}</div>`;
+            flashes.appendChild(toast);
+            if (window.lucide) lucide.createIcons();
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3800);
+        };
+
+        if (editIconBtn) editIconBtn.addEventListener('click', () => setEditMode(true));
+        if (cancelBtn) cancelBtn.addEventListener('click', () => { restoreOriginalValues(); setEditMode(false); });
+
+        if (avatarUpload) {
+            avatarUpload.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                if (!validTypes.includes(file.type)) {
+                    showToast('Only JPG, JPEG, and PNG are supported.', 'error');
+                    avatarUpload.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewAvatar(e.target.result);
+                    pendingAvatarFile = file;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', async () => {
+                const payload = { bio: bioTextarea ? bioTextarea.value.trim() : '' };
+                profileFields.forEach(field => {
+                    payload[field] = fieldInputs[field] ? fieldInputs[field].value.trim() : '';
+                });
+                if (!payload.full_name || !payload.username || !payload.email) {
+                    showToast('Full Name, Username, and Email Address are required.', 'error');
+                    return;
+                }
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i data-lucide="loader" class="animate-spin" style="width: 16px; height: 16px;"></i> Saving...';
+                if (window.lucide) lucide.createIcons();
+                try {
+                    const response = await fetch("{{ url_for('profile') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    if (!data.success) {
+                        showToast(data.message || 'Failed to save profile.', 'error');
+                        return;
+                    }
+                    updateSavedState(data.user);
+                    setEditMode(false);
+                    if (pendingAvatarFile) {
+                        const uploadResult = await uploadAvatar();
+                        if (uploadResult?.success) {
+                            if (avatarContainer) {
+                                avatarContainer.innerHTML = `<img id="profile_avatar_img" src="${uploadResult.avatar_url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" alt="Avatar">`;
+                            }
+                            originalAvatarMarkup = avatarContainer ? avatarContainer.innerHTML : originalAvatarMarkup;
+                            pendingAvatarFile = null;
+                        } else {
+                            showToast(uploadResult?.message || 'Profile updated, but photo upload failed.', 'error');
+                        }
+                    }
+                    const cardUsername = document.getElementById('card_username');
+                    if (cardUsername) cardUsername.textContent = '@' + (payload.username || '');
+                    const cardFullName = document.getElementById('card_full_name');
+                    if (cardFullName) cardFullName.textContent = payload.full_name || '';
+                    const sidebarName = document.querySelector('.user-snippet .user-name');
+                    if (sidebarName) sidebarName.textContent = payload.full_name || '';
+                    const sidebarHandle = document.querySelector('.user-snippet .user-handle');
+                    if (sidebarHandle) sidebarHandle.textContent = payload.username || '';
+                    const sidebarRole = document.querySelector('.user-snippet .user-role');
+                    if (sidebarRole) sidebarRole.textContent = payload.role || 'Threat Analyst';
+                    showToast(data.message || 'Profile updated successfully.', 'success');
+                } catch (error) {
+                    console.error('Profile save error:', error);
+                    showToast('An unexpected error occurred. Please try again.', 'error');
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i data-lucide="save" style="width: 16px; height: 16px;"></i> Save Changes';
+                    if (window.lucide) lucide.createIcons();
+                }
+            });
+        }
+
+        setEditMode(false);
+    });
+</script>
+{% endblock %}

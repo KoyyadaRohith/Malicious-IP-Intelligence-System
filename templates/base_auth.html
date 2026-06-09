@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="app-container">
+    <!-- Authenticated Navigation Sidebar -->
+    <aside class="app-sidebar">
+        <div class="sidebar-brand" style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-color); overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0, 240, 255, 0.05); box-shadow: 0 0 5px rgba(0, 240, 255, 0.1);">
+                <img src="{{ url_for('static', filename='img/logo_shield.png') }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Logo">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <span class="brand-text" style="background: none !important; -webkit-text-fill-color: skyblue !important; color: skyblue !important; text-transform: none !important; font-weight: 700;">Malicious IP</span>
+                <span style="font-size: 0.75rem; color: var(--text-secondary); letter-spacing: 0.03em;">Intelligence System</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                    <a href="{{ url_for('dashboard') }}" class="nav-link">
+                        <i data-lucide="activity"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if active_page == 'ip_investigation' %}active{% endif %}">
+                    <a href="{{ url_for('ip_investigation') }}" class="nav-link">
+                        <i data-lucide="search"></i>
+                        <span>IP Investigation</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if active_page == 'file_upload' %}active{% endif %}">
+                    <a href="{{ url_for('file_upload') }}" class="nav-link">
+                        <i data-lucide="upload-cloud"></i>
+                        <span>File Upload</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if active_page == 'watchlist' %}active{% endif %}">
+                    <a href="{{ url_for('watchlist') }}" class="nav-link">
+                        <i data-lucide="eye"></i>
+                        <span>Watchlist</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if active_page == 'history' %}active{% endif %}">
+                    <a href="{{ url_for('history') }}" class="nav-link">
+                        <i data-lucide="database"></i>
+                        <span>History</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if active_page == 'reports' %}active{% endif %}">
+                    <a href="{{ url_for('reports') }}" class="nav-link">
+                        <i data-lucide="file-text"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if active_page == 'threat_analytics' %}active{% endif %}">
+                    <a href="{{ url_for('threat_analytics') }}" class="nav-link">
+                        <i data-lucide="bar-chart-3"></i>
+                        <span>Threat Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if active_page == 'profile' %}active{% endif %}">
+                    <a href="{{ url_for('profile') }}" class="nav-link">
+                        <i data-lucide="user"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if active_page == 'settings' %}active{% endif %}">
+                    <a href="{{ url_for('settings') }}" class="nav-link">
+                        <i data-lucide="settings"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="nav-item" style="margin-top: 20px;">
+                    <a href="{{ url_for('logout') }}" class="nav-link" style="color: var(--color-malicious)">
+                        <i data-lucide="log-out"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <div class="user-snippet">
+                <div class="user-avatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    {% if global_avatar_url %}
+                        <img src="{{ global_avatar_url }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar">
+                    {% else %}
+                        {{ session.get('full_name', session.get('username', 'A'))[0] | upper }}
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    <span class="user-name" title="{{ session.get('username') }}">{{ session.get('full_name', session.get('username', 'Security Analyst')) }}</span>
+                    <span class="user-role">{{ session.get('username') }}</span>
+                    <span class="user-handle" style="display:none;">{{ session.get('username') }}</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content Stage -->
+    <main class="main-content">
+        <!-- Persistent Top Navigation Bar -->
+        <div class="top-nav-bar glass-panel" style="padding: 12px 24px; display: flex; justify-content: flex-end; align-items: center; margin-bottom: 24px; border-radius: 8px; position: relative; z-index: 99;">
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <!-- Action Notification Button & Dropdown Container -->
+                <div style="position: relative; display: inline-block;">
+                    <button id="notificationBtn" class="btn btn-secondary" style="padding: 8px; border-radius: 50%; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; position: relative;" title="Notifications">
+                        <i data-lucide="bell" style="width: 16px; height: 16px;"></i>
+                        {% if notifications %}
+                        <span id="notificationDot" style="position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; background-color: var(--color-malicious); border-radius: 50%; box-shadow: 0 0 8px var(--color-malicious);"></span>
+                        {% endif %}
+                    </button>
+                    
+                    <!-- Notification Dropdown -->
+                    <div id="notificationDropdown" class="glass-panel" style="display: none; position: absolute; right: 0; top: 48px; width: 300px; padding: 15px; z-index: 1001; box-shadow: var(--glass-shadow); border: 1px solid var(--border-color); border-radius: 8px; text-align: left;">
+                        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Notifications</span>
+                            <span style="font-size: 0.75rem; color: var(--primary); text-transform: none; font-weight: 500; cursor: pointer; user-select: none;" id="markAllRead">Clear All</span>
+                        </h4>
+                        <div class="notifications-container" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;">
+                            {% if notifications %}
+                                {% for notif in notifications %}
+                                <div style="{% if not loop.last %}border-bottom: 1px solid rgba(255,255,255,0.03); {% endif %}padding-bottom: 8px; display: flex; gap: 10px;">
+                                    <i data-lucide="{{ notif.icon }}" style="color: {{ notif.color }}; width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px;"></i>
+                                    <div>
+                                        <p style="font-size: 0.8rem; color: var(--text-primary); font-weight: 500; margin-bottom: 2px;">{{ notif.title }}</p>
+                                        <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3;">{{ notif.message }}</p>
+                                        <p style="font-size: 0.65rem; color: var(--text-muted); margin-top: 3px; font-family: var(--font-mono);">{{ notif.time }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div style="text-align: center; padding: 20px 10px; color: var(--text-muted);">
+                                    <i data-lucide="bell-off" style="width: 24px; height: 24px; display: block; margin: 0 auto 8px;"></i>
+                                    <p style="font-size: 0.8rem;">No activity recorded yet.</p>
+                                    <p style="font-size: 0.7rem;">Searches, exports, and changes will appear here.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            @keyframes blinkStatus {
+                0%, 100% { opacity: 0.4; }
+                50% { opacity: 1; }
+            }
+        </style>
+        
+        <!-- Notification Alert Overlay -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flashes" style="position: fixed; top: 20px; right: 20px; z-index: 1000; width: 320px;">
+                    {% for category, message in messages %}
+                        <div class="glass-panel alert-dismissible" style="padding: 16px; margin-bottom: 10px; border-left: 4px solid {% if category == 'error' %}var(--color-malicious){% elif category == 'success' %}var(--color-safe){% else %}var(--primary){% endif %}; display: flex; align-items: center; gap: 10px;">
+                            <i data-lucide="{% if category == 'error' %}alert-circle{% elif category == 'success' %}check-circle{% else %}info{% endif %}" style="color: {% if category == 'error' %}var(--color-malicious){% elif category == 'success' %}var(--color-safe){% else %}var(--primary){% endif %};"></i>
+                            <div style="font-size: 0.9rem;">{{ message }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="content-header">
+            <div>
+                <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
+                <p class="page-subtitle">{% block page_subtitle %}{% endblock %}</p>
+            </div>
+            <div class="actions">
+                {% block page_actions %}{% endblock %}
+            </div>
+        </div>
+        
+        {% block auth_content %}{% endblock %}
+    </main>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const notifBtn = document.getElementById('notificationBtn');
+        const notifDropdown = document.getElementById('notificationDropdown');
+        const notifDot = document.getElementById('notificationDot');
+        const markRead = document.getElementById('markAllRead');
+        
+        if (notifBtn && notifDropdown) {
+            notifBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isHidden = notifDropdown.style.display === 'none';
+                notifDropdown.style.display = isHidden ? 'block' : 'none';
+                
+                if (notifDot) {
+                    notifDot.style.display = 'none';
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+                    notifDropdown.style.display = 'none';
+                }
+            });
+        }
+        
+        if (markRead && notifDropdown) {
+            markRead.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fetch('/clear-notifications', { method: 'POST' })
+                    .then(() => {
+                        const container = notifDropdown.querySelector('.notifications-container');
+                        if (container) {
+                            container.innerHTML = `
+                                <div style="text-align: center; padding: 20px 10px; color: var(--text-muted);">
+                                    <i data-lucide="bell-off" style="width: 24px; height: 24px; display: block; margin: 0 auto 8px;"></i>
+                                    <p style="font-size: 0.8rem;">No activity recorded yet.</p>
+                                    <p style="font-size: 0.7rem;">Searches, exports, and changes will appear here.</p>
+                                </div>
+                            `;
+                            lucide.createIcons();
+                        }
+                        const dot = document.getElementById('notificationDot');
+                        if (dot) dot.remove();
+                    });
+            });
+        }
+    });
+</script>
+{% endblock %}

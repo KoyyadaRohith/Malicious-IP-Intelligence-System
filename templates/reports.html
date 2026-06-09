@@ -1,0 +1,95 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Reports - Malicious IP Intelligence System{% endblock %}
+{% block page_title %}Operational Intelligence Reports{% endblock %}
+{% block page_subtitle %}Review and export security summaries, network incident listings, and corporate telemetry downloads{% endblock %}
+
+{% block auth_content %}
+<style>
+    .report-card {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .report-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .report-icon-wrapper {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        background: rgba(0, 240, 255, 0.05);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+    }
+    
+    .report-details h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+    
+    .report-details p {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+    
+    .report-actions {
+        display: flex;
+        gap: 10px;
+    }
+</style>
+
+<div class="glass-panel" style="padding: 24px;">
+    <h3 class="chart-title" style="margin-bottom: 20px;">
+        <i data-lucide="folder-archive" style="color: var(--primary);"></i>
+        Compiled Intelligence Reports
+    </h3>
+    
+    {% if reports %}
+        {% for report in reports %}
+            <div class="glass-panel report-card">
+                <div class="report-meta">
+                    <div class="report-icon-wrapper">
+                        <i data-lucide="{% if report.type == 'individual' %}user-check{% else %}folder-git{% endif %}"></i>
+                    </div>
+                    <div class="report-details">
+                        <h4>{{ report.title }}</h4>
+                        <p>
+                            <span>Compiled: {{ report.date }}</span>
+                            <span style="margin: 0 6px;">|</span>
+                            <span>Scope: {{ report.scope }}</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="report-actions">
+                    {% if report.type == 'individual' %}
+                        <a href="{{ url_for('download_report', report_id='individual_' ~ report.ip) }}" target="_blank" class="btn btn-outline-primary" style="padding: 6px 12px; font-size: 0.8rem;">
+                            <i data-lucide="printer" style="width: 14px; height: 14px;"></i> Export PDF
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('download_report', report_id='bulk_' ~ report.batch_id) }}" target="_blank" class="btn btn-outline-primary" style="padding: 6px 12px; font-size: 0.8rem;">
+                            <i data-lucide="printer" style="width: 14px; height: 14px;"></i> Export PDF
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; color: var(--text-muted); padding: 40px 10px;">
+            <i data-lucide="file-warning" style="width: 36px; height: 36px; display: block; margin: 0 auto 12px; color: var(--text-muted);"></i>
+            No reports compiled yet. Conduct IP searches or bulk uploads to generate exportable files.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

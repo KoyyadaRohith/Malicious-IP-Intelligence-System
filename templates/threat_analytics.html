@@ -1,0 +1,244 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Threat Analytics - Malicious IP Intelligence System{% endblock %}
+{% block page_title %}Threat Analytics{% endblock %}
+{% block page_subtitle %}Deep visibility into attack surface risk, watchlist status, and threat trend behavior{% endblock %}
+
+{% block page_actions %}
+<button onclick="window.print();" class="btn btn-primary">
+    <i data-lucide="printer"></i> Export PDF
+</button>
+{% endblock %}
+
+{% block auth_content %}
+<div class="widget-grid">
+    <div class="glass-panel metric-card primary animate-fade">
+        <div class="metric-header">
+            <span class="metric-title">Total Investigations</span>
+            <i data-lucide="activity" class="metric-icon"></i>
+        </div>
+        <div class="metric-value">{{ total_scans }}</div>
+    </div>
+    <div class="glass-panel metric-card suspicious animate-fade">
+        <div class="metric-header">
+            <span class="metric-title">Suspicious Findings</span>
+            <i data-lucide="alert-triangle" class="metric-icon"></i>
+        </div>
+        <div class="metric-value">{{ threat_breakdown.Suspicious }}</div>
+    </div>
+    <div class="glass-panel metric-card malicious animate-fade">
+        <div class="metric-header">
+            <span class="metric-title">Malicious Risks</span>
+            <i data-lucide="skull" class="metric-icon"></i>
+        </div>
+        <div class="metric-value">{{ threat_breakdown.Malicious }}</div>
+    </div>
+    <div class="glass-panel metric-card safe animate-fade">
+        <div class="metric-header">
+            <span class="metric-title">Watchlist Entries</span>
+            <i data-lucide="eye" class="metric-icon"></i>
+        </div>
+        <div class="metric-value">{{ total_watchlist }}</div>
+    </div>
+    <div class="glass-panel metric-card primary animate-fade">
+        <div class="metric-header">
+            <span class="metric-title">Exported Reports</span>
+            <i data-lucide="file-text" class="metric-icon"></i>
+        </div>
+        <div class="metric-value">{{ total_reports }}</div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="glass-panel chart-card">
+        <h3 class="chart-title">
+            <i data-lucide="trending-up" style="color: var(--primary);"></i>
+            Investigation Volume (7-Day Trend)
+        </h3>
+        <div class="chart-wrapper">
+            <canvas id="weeklyTrendChart"></canvas>
+        </div>
+    </div>
+    <div class="glass-panel chart-card">
+        <h3 class="chart-title">
+            <i data-lucide="pie-chart" style="color: var(--accent-indigo);"></i>
+            Threat Classification Mix
+        </h3>
+        <div class="chart-wrapper">
+            <canvas id="classificationBreakdownChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ON-SCREEN: Recent scans with View Full History link (hidden during print) -->
+<div class="glass-panel no-print" style="padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 class="chart-title" style="margin-bottom: 0;">
+            <i data-lucide="list-check" style="color: var(--primary);"></i>
+            Recent Scan Summary
+        </h3>
+        <a href="{{ url_for('history') }}" style="color: var(--primary); font-size: 0.85rem; text-decoration: none;">View Full History →</a>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Scan Date</th>
+                    <th>IP Address</th>
+                    <th>Score</th>
+                    <th>Classification</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recent_scans %}
+                    {% for scan in recent_scans %}
+                        <tr>
+                            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);">{{ scan.date.split('T')[0] }} {{ scan.date.split('T')[1][:5] if 'T' in scan.date else '' }}</td>
+                            <td style="font-family: var(--font-mono); font-weight: 600;">{{ scan.ip }}</td>
+                            <td>{{ scan.risk_score }}/100</td>
+                            <td>
+                                <span class="badge {% if scan.classification == 'Safe' %}badge-safe{% elif scan.classification == 'Suspicious' %}badge-suspicious{% else %}badge-malicious{% endif %}">
+                                    {{ scan.classification }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('investigation_results', ip_address=scan.ip) }}" class="btn btn-outline-primary" style="padding: 6px 12px; font-size: 0.8rem;">
+                                    <i data-lucide="eye" style="width: 14px; height: 14px;"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 30px 10px;">
+                            No recent scans available. Start an IP investigation or upload a batch file.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- PRINT-ONLY: Complete investigation history (hidden on screen, shown on print) -->
+<div class="glass-panel print-only" style="padding: 24px; display: none;">
+    <div style="margin-bottom: 20px;">
+        <h3 class="chart-title" style="margin-bottom: 0;">
+            Complete Investigation History
+        </h3>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Scan Date</th>
+                    <th>IP Address</th>
+                    <th>Score</th>
+                    <th>Classification</th>
+                    <th>ISP</th>
+                    <th>Country</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if all_scans %}
+                    {% for scan in all_scans %}
+                        <tr>
+                            <td style="font-family: var(--font-mono); font-size: 0.8rem;">{{ scan.date.split('T')[0] }} {{ scan.date.split('T')[1][:5] if 'T' in scan.date else '' }}</td>
+                            <td style="font-family: var(--font-mono); font-weight: 600;">{{ scan.ip }}</td>
+                            <td>{{ scan.risk_score }}/100</td>
+                            <td>
+                                <span class="badge {% if scan.classification == 'Safe' %}badge-safe{% elif scan.classification == 'Suspicious' %}badge-suspicious{% else %}badge-malicious{% endif %}">
+                                    {{ scan.classification }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.85rem;">{{ scan.isp | default('—') }}</td>
+                            <td style="font-size: 0.85rem;">{{ scan.country | default('—') }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px 10px;">
+                            No scans available.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const classificationData = [
+        {{ threat_breakdown.Safe }},
+        {{ threat_breakdown.Suspicious }},
+        {{ threat_breakdown.Malicious }}
+    ];
+    const classificationLabels = ['Safe', 'Suspicious', 'Malicious'];
+    const classificationColors = ['#22c55e', '#f59e0b', '#ef4444'];
+
+    const breakdownCtx = document.getElementById('classificationBreakdownChart');
+    if (breakdownCtx) {
+        new Chart(breakdownCtx, {
+            type: 'doughnut',
+            data: {
+                labels: classificationLabels,
+                datasets: [{
+                    data: classificationData,
+                    backgroundColor: classificationColors,
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: 'var(--text-primary)', boxWidth: 12, boxHeight: 12 } },
+                    tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.95)', bodyColor: 'white', titleColor: 'white' }
+                }
+            }
+        });
+    }
+
+    const trendCtx = document.getElementById('weeklyTrendChart');
+    if (trendCtx) {
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: {{ trend_labels | tojson }},
+                datasets: [{
+                    label: 'Daily Investigations',
+                    data: {{ trend_counts | tojson }},
+                    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                    borderColor: 'rgba(59, 130, 246, 0.95)',
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointBorderColor: '#fff',
+                    tension: 0.35,
+                    fill: true,
+                    pointRadius: 5,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: 'var(--text-secondary)' },
+                        grid: { color: 'rgba(255,255,255,0.08)' }
+                    },
+                    x: {
+                        ticks: { color: 'var(--text-secondary)' },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.95)', bodyColor: 'white', titleColor: 'white' }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

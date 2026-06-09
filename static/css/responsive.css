@@ -1,0 +1,128 @@
+/* Responsive breakpoints for the intelligence dashboard */
+
+@media (max-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-sidebar {
+        transform: translateX(-100%);
+        width: 240px;
+    }
+    
+    .app-sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+    
+    .content-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .widget-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    
+    .chart-wrapper {
+        height: 220px;
+    }
+    
+    /* Toggle button for mobile menu */
+    .mobile-menu-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-surface-opaque);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        cursor: pointer;
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 200;
+    }
+}
+
+/* Print stylesheet for Threat Intelligence reports */
+@media print {
+    body {
+        background: #fff !important;
+        color: #000 !important;
+        font-size: 11pt !important;
+    }
+    
+    .app-sidebar,
+    .mobile-menu-toggle,
+    .btn,
+    .content-header .actions,
+    footer {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .glass-panel {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        color: #000 !important;
+        page-break-inside: auto;
+    }
+    
+    /* Ensure table rows do not split awkwardly across page breaks and headers repeat */
+    thead {
+        display: table-header-group;
+    }
+    tr {
+        page-break-inside: avoid;
+    }
+    
+    .badge {
+        border: 1px solid #000 !important;
+        background: transparent !important;
+        color: #000 !important;
+    }
+
+    /* Print styling overrides for tables to ensure visible borders on all sides */
+    .data-table {
+        border-collapse: collapse !important;
+        border: 1px solid #94a3b8 !important;
+        width: 100% !important;
+    }
+
+    .data-table th {
+        background: #f1f5f9 !important;
+        color: #000 !important;
+        border: 1px solid #94a3b8 !important;
+        padding: 10px 12px !important;
+    }
+    
+    .data-table td {
+        border: 1px solid #cbd5e1 !important;
+        color: #000 !important;
+        padding: 8px 12px !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+}

@@ -1,0 +1,122 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Watchlist - Malicious IP Intelligence System{% endblock %}
+{% block page_title %}Security Watchlist{% endblock %}
+{% block page_subtitle %}Actively monitored suspicious or malicious nodes currently blacklisted or under audit surveillance{% endblock %}
+
+{% block page_actions %}
+<div style="display: flex; gap: 10px;">
+    <a href="{{ url_for('download_report', report_id='watchlist_csv') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">
+        <i data-lucide="download" style="width: 16px; height: 16px;"></i> CSV
+    </a>
+    <a href="{{ url_for('download_report', report_id='watchlist_txt') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">
+        <i data-lucide="file-down" style="width: 16px; height: 16px;"></i> TXT
+    </a>
+    <button onclick="window.print();" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">
+        <i data-lucide="printer" style="width: 16px; height: 16px;"></i> PDF
+    </button>
+</div>
+{% endblock %}
+
+{% block auth_content %}
+<div class="glass-panel" style="padding: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i data-lucide="eye" style="color: var(--primary);"></i>
+            <h3 class="chart-title" style="margin-bottom: 0;">Watchlist Database</h3>
+        </div>
+        
+        <!-- Search and filters -->
+        <div class="no-print" style="display: flex; gap: 10px;">
+            <input type="text" id="tableSearch" class="form-control" placeholder="Search target IP..." style="width: 220px; padding: 6px 12px; font-size: 0.85rem;">
+            <select id="tableFilter" class="form-control" style="width: 140px; padding: 6px 12px; font-size: 0.85rem;">
+                <option value="">All Ranks</option>
+                <option value="Safe">Safe</option>
+                <option value="Suspicious">Suspicious</option>
+                <option value="Malicious">Malicious</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Target IP</th>
+                    <th>Risk Rating</th>
+                    <th>Classification</th>
+                    <th>Date Added</th>
+                    <th>Analyst Reason / Incident Notes</th>
+                    <th>Status</th>
+                    <th class="no-print">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if watchlist %}
+                    {% for row in watchlist %}
+                        <tr>
+                            <td style="font-family: var(--font-mono); font-weight: 600;">{{ row.ip }}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 50px; background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; overflow: hidden;">
+                                        <div style="width: {{ row.risk_score }}%; height: 100%; background: {% if row.classification == 'Safe' %}var(--color-safe){% elif row.classification == 'Suspicious' %}var(--color-suspicious){% else %}var(--color-malicious){% endif %};"></div>
+                                    </div>
+                                    <span style="font-family: var(--font-mono); font-size: 0.8rem;">{{ row.risk_score }}/100</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if row.classification == 'Safe' %}badge-safe{% elif row.classification == 'Suspicious' %}badge-suspicious{% else %}badge-malicious{% endif %}">
+                                    {{ row.classification }}
+                                </span>
+                            </td>
+                            <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary);">
+                                {{ row.date_added.split('T')[0] }}
+                            </td>
+                            <td style="font-size: 0.85rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                {{ row.reason }}
+                            </td>
+                            <td>
+                                <span style="color: var(--primary); font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">
+                                    <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); margin-right: 4px; vertical-align: middle; animation: blink 2s infinite;"></span>
+                                    {{ row.status }}
+                                </span>
+                            </td>
+                            <td class="no-print">
+                                <div style="display: flex; gap: 8px;">
+                                    <a href="{{ url_for('ip_investigation') }}?ip_address={{ row.ip }}" class="btn btn-outline-primary" style="padding: 4px 8px; font-size: 0.75rem;">
+                                        <i data-lucide="eye" style="width: 12px; height: 12px;"></i> View
+                                    </a>
+                                    <form action="{{ url_for('watchlist_delete') }}" method="POST" style="display: inline;">
+                                        <input type="hidden" name="ip" value="{{ row.ip }}">
+                                        <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.75rem;">
+                                            <i data-lucide="trash" style="width: 12px; height: 12px;"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px 10px;">
+                            <i data-lucide="eye-off" style="width: 32px; height: 32px; display: block; margin: 0 auto 10px; color: var(--text-muted);"></i>
+                            No IP targets added to watchlist yet. Log high-risk IPs in IP Investigation.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    @keyframes blink {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

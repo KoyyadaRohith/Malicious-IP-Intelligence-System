@@ -1,0 +1,231 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Settings - Malicious IP Intelligence System{% endblock %}
+{% block page_title %}System Settings{% endblock %}
+{% block page_subtitle %}Manage account access, appearance, notifications, reporting, exports, security, and system details{% endblock %}
+
+{% block auth_content %}
+<div class="glass-panel" style="padding: 30px; max-width: 900px; margin: 0 auto;">
+    <h3 class="chart-title" style="margin-bottom: 25px; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="sliders-horizontal" style="color: var(--primary);"></i>
+        System Control Center
+    </h3>
+    
+    <form action="{{ url_for('settings') }}" method="POST">
+        
+        <!-- SECTION 1: General Settings -->
+        <div class="settings-section" style="margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+            <h4 style="font-size: 0.95rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="user-check" style="width: 16px; height: 16px; color: var(--primary);"></i>
+                1. Account & Access
+            </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label for="timezone" class="form-label">Default Timezone</label>
+                    <select id="timezone" name="timezone" class="form-control">
+                        <option value="UTC" {% if settings.timezone == 'UTC' %}selected{% endif %}>UTC (Coordinated Universal Time)</option>
+                        <option value="Local" {% if settings.timezone == 'Local' or not settings.timezone %}selected{% endif %}>Local System Time</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="auto_refresh" class="form-label">Dashboard Auto-Refresh</label>
+                    <select id="auto_refresh" name="auto_refresh" class="form-control">
+                        <option value="none" {% if settings.auto_refresh == 'none' %}selected{% endif %}>Disabled</option>
+                        <option value="5" {% if settings.auto_refresh == '5' or not settings.auto_refresh %}selected{% endif %}>Every 5 minutes</option>
+                        <option value="15" {% if settings.auto_refresh == '15' %}selected{% endif %}>Every 15 minutes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 2: Theme Settings -->
+        <div class="settings-section" style="margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+            <h4 style="font-size: 0.95rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="palette" style="width: 16px; height: 16px; color: var(--accent-blue);"></i>
+                2. Appearance Settings
+            </h4>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="flex: 1;">
+                    <label class="form-label" style="margin-bottom: 4px;">Active Interface Theme</label>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Toggle between dark threat appearance and clean enterprise light mode.</span>
+                </div>
+                <button type="button" id="settingsThemeToggle" class="btn btn-secondary" style="padding: 10px 18px; display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="sun" id="settingsThemeIcon" style="width: 16px; height: 16px;"></i>
+                    <span id="settingsThemeText">Switch Theme</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- SECTION 3: Notification Settings -->
+        <div class="settings-section" style="margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+            <h4 style="font-size: 0.95rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="bell" style="width: 16px; height: 16px; color: var(--color-suspicious);"></i>
+                3. Notification Settings
+            </h4>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="form-group" style="display: flex; align-items: center; gap: 12px; margin-bottom: 0;">
+                    <input type="checkbox" id="email_alerts" name="email_alerts" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary);" {% if settings.email_alerts %}checked{% endif %}>
+                    <div>
+                        <label for="email_alerts" style="font-weight: 500; font-size: 0.9rem; cursor: pointer; display: block; margin-bottom: 2px;">Email Security Dispatch Alerts</label>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Send alert to corporate address when scans detect high-confidence malicious host.</span>
+                    </div>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 12px; margin-bottom: 0;">
+                    <input type="checkbox" id="desktop_notifications" name="desktop_notifications" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary);" {% if settings.desktop_notifications %}checked{% endif %}>
+                    <div>
+                        <label for="desktop_notifications" style="font-weight: 500; font-size: 0.9rem; cursor: pointer; display: block; margin-bottom: 2px;">Desktop Push Notifications</label>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Receive web-browser notifications when background bulk uploads complete processing.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 4: Report Settings -->
+        <div class="settings-section" style="margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+            <h4 style="font-size: 0.95rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="file-text" style="width: 16px; height: 16px; color: var(--accent-indigo);"></i>
+                4. Report Settings
+            </h4>
+            <div class="form-group">
+                <label for="report_header" class="form-label">Custom Audit Report Header Name</label>
+                <input type="text" id="report_header" name="report_header" class="form-control" value="{{ settings.report_header or 'Malicious IP Audit Summary' }}" placeholder="E.g. Corporate IT Infrastructure Audit">
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 12px; margin-bottom: 0;">
+                <input type="checkbox" id="include_whois" name="include_whois" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary);" {% if settings.include_whois or settings.include_whois is not defined %}checked{% endif %}>
+                <div>
+                    <label for="include_whois" style="font-weight: 500; font-size: 0.9rem; cursor: pointer; display: block; margin-bottom: 2px;">Include WHOIS Domain Data in Export</label>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Automatically append full registrar registry details to generated PDF/TXT downloads.</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECTION 5: Export Settings -->
+        <div class="settings-section" style="margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+            <h4 style="font-size: 0.95rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="download" style="width: 16px; height: 16px; color: var(--color-safe);"></i>
+                5. Export Settings
+            </h4>
+            <div class="form-group">
+                <label for="export_format" class="form-label">Default Bulk Export Format</label>
+                <select id="export_format" name="export_format" class="form-control">
+                    <option value="csv" {% if settings.export_format == 'csv' or not settings.export_format %}selected{% endif %}>CSV (Comma-Separated Values Sheet)</option>
+                    <option value="txt" {% if settings.export_format == 'txt' %}selected{% endif %}>TXT (Plaintext Summary File)</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- SECTION 6: Security Settings -->
+        <div class="settings-section" style="margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+            <h4 style="font-size: 0.95rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="shield" style="width: 16px; height: 16px; color: var(--color-malicious);"></i>
+                6. Security Settings
+            </h4>
+            <div class="form-group">
+                <label for="session_timeout" class="form-label">User Session Timeout</label>
+                <select id="session_timeout" name="session_timeout" class="form-control">
+                    <option value="1" {% if settings.session_timeout == '1' %}selected{% endif %}>1 Hour inactivity limit</option>
+                    <option value="4" {% if settings.session_timeout == '4' or not settings.session_timeout %}selected{% endif %}>4 Hours inactivity limit</option>
+                    <option value="24" {% if settings.session_timeout == '24' %}selected{% endif %}>24 Hours inactivity limit</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- SECTION 7: Auto-Watchlist Risk Score Ingest Limit -->
+        <div class="settings-section" style="margin-bottom: 30px;">
+            <h4 style="font-size: 0.95rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="sliders-horizontal" style="width: 16px; height: 16px; color: var(--primary);"></i>
+                7. Auto-Watchlist Risk Score Ingest Limit
+            </h4>
+            
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label for="auto_watchlist_score" class="form-label" style="margin-bottom: 0;">Auto-Watchlist Risk Score Ingest Limit</label>
+                    <span id="scoreVal" style="font-family: var(--font-mono); font-weight: bold; color: var(--primary);">{{ settings.auto_watchlist_score or 75 }}</span>
+                </div>
+                <input type="range" id="auto_watchlist_score" name="auto_watchlist_score" min="0" max="100" class="form-control" style="padding: 0; cursor: pointer;" value="{{ settings.auto_watchlist_score or 75 }}" oninput="document.getElementById('scoreVal').textContent = this.value">
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">Investigated target IPs exceeding this rating index are automatically appended to the Watchlist.</p>
+            </div>
+        </div>
+
+        <div class="settings-section" style="margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;">
+            <h4 style="font-size: 0.95rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="monitor" style="width: 16px; height: 16px; color: var(--accent-teal);"></i>
+                8. System Information
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap: 15px;">
+                <div class="form-group">
+                    <label class="form-label">Platform</label>
+                    <div class="form-control">{{ system_info.platform }}</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">OS Version</label>
+                    <div class="form-control">{{ system_info.os_version }}</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Python Runtime</label>
+                    <div class="form-control">{{ system_info.python_version }}</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Architecture</label>
+                    <div class="form-control">{{ system_info.architecture }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="padding: 12px 24px; font-size: 1rem; width: 100%;">
+            <i data-lucide="save"></i> Commit Configurations
+        </button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeBtn = document.getElementById('settingsThemeToggle');
+        const themeIcon = document.getElementById('settingsThemeIcon');
+        const themeText = document.getElementById('settingsThemeText');
+        const root = document.documentElement;
+        
+        const updateThemeUI = (theme) => {
+            if (theme === 'light') {
+                themeIcon.setAttribute('data-lucide', 'sun');
+                themeIcon.style.color = '#eab308';
+                themeText.textContent = 'Light Mode Enabled';
+            } else {
+                themeIcon.setAttribute('data-lucide', 'moon');
+                themeIcon.style.color = 'var(--primary)';
+                themeText.textContent = 'Dark Mode Enabled';
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        const activeTheme = root.getAttribute('data-theme') || 'dark';
+        updateThemeUI(activeTheme);
+        
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                const currentTheme = root.getAttribute('data-theme') || 'dark';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                root.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeUI(newTheme);
+                
+                // Sync top nav toggle bar icon if present
+                const topNavIcon = document.querySelector('#themeToggleBtn i');
+                if (topNavIcon) {
+                    if (newTheme === 'light') {
+                        topNavIcon.setAttribute('data-lucide', 'sun');
+                        topNavIcon.style.color = '#eab308';
+                    } else {
+                        topNavIcon.setAttribute('data-lucide', 'moon');
+                        topNavIcon.style.color = 'var(--primary)';
+                    }
+                    if (window.lucide) lucide.createIcons();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

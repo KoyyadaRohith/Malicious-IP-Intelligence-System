@@ -1,0 +1,36 @@
+======================================================================
+          MALICIOUS IP INTELLIGENCE SYSTEM - BATCH INGESTION SUMMARY
+======================================================================
+Report Timestamp: 2026-06-05 22:08:20
+Source Filename:  Bulk_Set-3_txt
+----------------------------------------------------------------------
+BATCH AGGREGATIONS
+----------------------------------------------------------------------
+Total Unique IPs Ingested: 10
+  - Safe Targets:          3 (30.0%)
+  - Suspicious Targets:    5 (50.0%)
+  - Malicious Targets:     2 (20.0%)
+----------------------------------------------------------------------
+THREAT REMEDIATION MATRIX
+----------------------------------------------------------------------
+CRITICAL: 2 IP nodes classified as Malicious. PERIMETER BLOCK RECOMMENDED.
+WARNING:  5 IP nodes classified as Suspicious. SURVEILLANCE AUDIT REGISTER RECOMMENDED.
+
+----------------------------------------------------------------------
+NODE REPUTATION DIRECTORY
+----------------------------------------------------------------------
+IP ADDRESS          SCORE   CLASS          ISP NETWORK                   COUNTRY        
+----------------------------------------------------------------------------------------
+193.32.209.247      55/100  Suspicious     Hydra Communications Ltd      United Kingdom 
+178.90.226.129      18/100  Safe           JSC Kazakhtelecom             Kazakhstan     
+213.209.159.225     65/100  Malicious      Feo Prest SRL                 Germany        
+195.184.76.31       62/100  Malicious      Onyphe SAS                    United States  
+185.234.27.226      12/100  Safe           Tele2 Kazakhstan              Kazakhstan     
+174.225.218.120     2/100   Safe           Verizon Business              United States  
+200.58.137.90       52/100  Suspicious     Telefonica Moviles del Urugu  Uruguay        
+193.32.209.246      55/100  Suspicious     Hydra Communications Ltd      United Kingdom 
+213.230.87.28       38/100  Suspicious     "Uzbektelekom" Joint Stock C  Uzbekistan     
+211.253.9.49        52/100  Suspicious     PUBNET                        South Korea    
+======================================================================
+                     [SECURE CONSOLE REPORT LOG]
+======================================================================

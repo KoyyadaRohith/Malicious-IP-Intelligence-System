@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - Malicious IP Intelligence System{% endblock %}
+
+{% block content %}
+<style>
+    .auth-wrapper {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    
+    .auth-card {
+        width: 100%;
+        max-width: 420px;
+        padding: 40px 30px;
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .auth-logo {
+        color: var(--primary);
+        filter: drop-shadow(0 0 8px var(--primary-glow));
+        margin-bottom: 12px;
+    }
+    
+    .auth-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .auth-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    .btn-google:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: var(--border-color-hover) !important;
+        transform: translateY(-2px);
+        box-shadow: var(--neon-shadow);
+    }
+</style>
+
+<div class="auth-wrapper">
+    <div class="glass-panel auth-card">
+        <div class="auth-header">
+            <div style="width: 52px; height: 52px; border-radius: 10px; border: 1px solid var(--border-color); overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0, 240, 255, 0.05); margin: 0 auto 15px; box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);">
+                <img src="{{ url_for('static', filename='img/logo_shield.png') }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Logo">
+            </div>
+            <h2 class="auth-title">Login</h2>
+            <p class="auth-subtitle">Sign in to access threat intelligence tools</p>
+        </div>
+        
+        <!-- Flash messages for auth errors -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background: rgba(255, 0, 85, 0.1); border: 1px solid rgba(255, 0, 85, 0.2); border-radius: 6px; padding: 10px 14px; margin-bottom: 20px; font-size: 0.85rem; color: var(--color-malicious); display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="alert-circle" style="width: 16px; height: 16px;"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form action="{{ url_for('login') }}" method="POST">
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Enter username" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            
+            <!-- Remember Me Checkbox -->
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                <input type="checkbox" id="remember" name="remember" style="accent-color: var(--primary); cursor: pointer; width: 15px; height: 15px;">
+                <label for="remember" class="form-label" style="margin-bottom: 0; cursor: pointer; user-select: none; font-size: 0.85rem;">Remember Me</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-bottom: 15px;">
+                <i data-lucide="key"></i> Login
+            </button>
+            
+            <!-- Forgot Keys / Register Options -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                <a href="{{ url_for('forgot_password') }}" class="btn btn-secondary" style="font-size: 0.8rem; padding: 10px;">
+                    <i data-lucide="help-circle" style="width: 14px; height: 14px;"></i> Forgot Keys?
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-primary" style="font-size: 0.8rem; padding: 10px;">
+                    <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i> Register
+                </a>
+            </div>
+
+            <!-- Google Sign-in Divider & Button -->
+            <div style="display: flex; align-items: center; margin: 15px 0; gap: 10px;">
+                <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Or continue with</span>
+                <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+            </div>
+            
+            {% if Config.GOOGLE_CLIENT_ID %}
+                <!-- Load Google Identity Services Client Library -->
+                <script src="https://accounts.google.com/gsi/client" async defer></script>
+                
+                <!-- Google GSI Standard Button Container -->
+                <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 10px;">
+                    <div id="g_id_onload"
+                         data-client_id="{{ Config.GOOGLE_CLIENT_ID }}"
+                         data-context="signin"
+                         data-ux_mode="popup"
+                         data-login_uri="{{ url_for('google_callback', _external=True) }}"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-shape="rectangular"
+                         data-theme="outline"
+                         data-text="signin_with"
+                         data-size="large"
+                         data-logo_alignment="left"
+                         data-width="360">
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ url_for('login_google') }}" class="btn btn-google" style="width: 100%; padding: 12px; margin-bottom: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; border-radius: 8px; font-weight: 500; font-family: var(--font-sans); border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.03); color: var(--text-primary); transition: all 0.3s ease;">
+                    <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24">
+                        <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.68 1.54 14.98 1 12 1 7.35 1 3.37 3.68 1.48 7.58l3.87 3C6.27 7.59 8.91 5.04 12 5.04z"/>
+                        <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.42 3.58v2.97h3.91c2.28-2.1 3.54-5.19 3.54-8.7z"/>
+                        <path fill="#FBBC05" d="M5.35 10.58c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.48 3C.53 4.91 0 7.05 0 9.29s.53 4.38 1.48 6.29l3.87-3z"/>
+                        <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.91-2.97c-1.12.75-2.55 1.2-4.05 1.2-3.09 0-5.73-2.55-6.65-5.54L1.48 15.7C3.37 19.62 7.35 22.3 12 22.3z"/>
+                    </svg>
+                    Google Account
+                </a>
+            {% endif %}
+
+        </form>
+    </div>
+</div>
+{% endblock %}
+

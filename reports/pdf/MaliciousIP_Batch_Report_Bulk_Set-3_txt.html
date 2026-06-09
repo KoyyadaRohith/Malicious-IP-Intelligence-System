@@ -1,0 +1,164 @@
+
+    <html>
+    <head>
+        <title>Malicious IP Intelligence System - Bulk Audit Report</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.5; color: #111; padding: 40px; background: #fff; }
+            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
+            .section { margin-bottom: 25px; }
+            .section-title { font-size: 1.2em; font-weight: bold; border-bottom: 1px solid #ddd; padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase; }
+            .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center; margin-bottom: 25px; }
+            .metric-box { border: 1px solid #ddd; padding: 15px; border-radius: 4px; }
+            .metric-val { font-size: 1.5em; font-weight: bold; margin-bottom: 4px; }
+            .table-results { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em; }
+            .table-results th { text-align: left; padding: 8px; background: #f5f5f5; border-bottom: 2px solid #ccc; }
+        </style>
+    </head>
+    <body>
+    <script>
+        window.onload = function() {
+            window.print();
+        };
+        window.onafterprint = function() {
+            window.close();
+        };
+    </script>
+        <div class="header">
+            <h1 style="margin: 0; font-size: 1.8em;">MALICIOUS IP INTELLIGENCE SYSTEM</h1>
+            <p style="margin: 5px 0 0 0; color: #555; font-size: 0.95em;">Malicious IP Intelligence System - Bulk Diagnostic Audit</p>
+            <p style="margin: 5px 0 0 0; font-size: 0.85em; color: #888;">Generated: 2026-06-05 22:09 | File Source: Bulk_Set-3_txt</p>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Batch Threat Profile Aggregations</div>
+            <div class="grid">
+                <div class="metric-box">
+                    <div class="metric-val">10</div>
+                    <div style="color: #666; font-size: 0.8em; text-transform: uppercase;">Total Ingested</div>
+                </div>
+                <div class="metric-box" style="border-top: 3px solid #10b981;">
+                    <div class="metric-val">3</div>
+                    <div style="color: #666; font-size: 0.8em; text-transform: uppercase;">Safe Nodes</div>
+                </div>
+                <div class="metric-box" style="border-top: 3px solid #f59e0b;">
+                    <div class="metric-val">5</div>
+                    <div style="color: #666; font-size: 0.8em; text-transform: uppercase;">Suspicious Nodes</div>
+                </div>
+                <div class="metric-box" style="border-top: 3px solid #ff0055;">
+                    <div class="metric-val">2</div>
+                    <div style="color: #666; font-size: 0.8em; text-transform: uppercase;">Malicious Nodes</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Threat Remediation Playbook Summary</div>
+            <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #333; font-size: 0.95em;">
+                <strong>Playbook Remediations:</strong>
+                <ul style="margin: 8px 0 0 0; padding-left: 20px; color: #444;">
+                    <li>Configure firewalls to block all traffic coming from the 2 malicious IPs detected.</li>
+                    <li>Surveillance logging and active packet inspections are recommended for the 5 suspicious IPs.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">Analyzed IP Ingestion Directory</div>
+            <table class="table-results">
+                <thead>
+                    <tr>
+                        <th>IP Target Address</th>
+                        <th>Classification</th>
+                        <th>Risk Rating</th>
+                        <th>ISP Infrastructure</th>
+                        <th>Country</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">193.32.209.247</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Suspicious</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">55/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Hydra Communications Ltd</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">United Kingdom</td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">178.90.226.129</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Safe</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">18/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">JSC Kazakhtelecom</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Kazakhstan</td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">213.209.159.225</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Malicious</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">65/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Feo Prest SRL</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Germany</td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">195.184.76.31</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Malicious</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">62/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Onyphe SAS</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">United States</td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">185.234.27.226</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Safe</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">12/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Tele2 Kazakhstan</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Kazakhstan</td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">174.225.218.120</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Safe</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">2/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Verizon Business</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">United States</td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">200.58.137.90</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Suspicious</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">52/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Telefonica Moviles del Uruguay SA</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Uruguay</td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">193.32.209.246</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Suspicious</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">55/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Hydra Communications Ltd</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">United Kingdom</td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">213.230.87.28</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Suspicious</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">38/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">"Uzbektelekom" Joint Stock Company</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Uzbekistan</td>
+        </tr>
+        
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">211.253.9.49</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">Suspicious</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd; font-family: monospace;">52/100</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">PUBNET</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;">South Korea</td>
+        </tr>
+        
+                </tbody>
+            </table>
+        </div>
+    </body>
+    </html>
+    
