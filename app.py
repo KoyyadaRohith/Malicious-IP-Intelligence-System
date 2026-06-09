@@ -1308,7 +1308,16 @@ def settings():
 
 # --- RUN APPLICATION ---
 
+import os
+
 if __name__ == '__main__':
     print("[*] Starting Malicious IP Intelligence System...")
     print(f"[*] Base Workspace: {Config.BASE_DIR}")
-    app.run(port=Config.PORT, debug=Config.DEBUG)
+
+    port = int(os.environ.get("PORT", Config.PORT))
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=Config.DEBUG
+    )
