@@ -1,59 +1,123 @@
 # 🛡️ Malicious IP Intelligence System
 
-### 🌐 Threat Intelligence & IP Reputation Analysis Platform
+### 🌐 AI-Powered Threat Intelligence & IP Reputation Analysis Platform
 
-![Python](https://img.shields.io/badge/Python-3.x-blue)
-![Flask](https://img.shields.io/badge/Flask-Web%20Framework-green)
-![Cybersecurity](https://img.shields.io/badge/Cybersecurity-Threat%20Intelligence-red)
-![Status](https://img.shields.io/badge/Status-Active-success)
+
+
+
+\
+
+---
+
+## 🚀 Live Demo
+
+🌐 **Project Website**
+https://koyyadarohith.github.io/Malicious-IP-Intelligence-System/
+
+📂 **Source Code**
+https://github.com/KoyyadaRohith/Malicious-IP-Intelligence-System
+
+---
+
+## 🏆 Why This Project?
+
+✅ AI-Powered Threat Intelligence
+
+✅ Real-Time IP Reputation Analysis
+
+✅ VirusTotal Integration
+
+✅ AbuseIPDB Integration
+
+✅ Automated Risk Scoring
+
+✅ Bulk IP Investigation
+
+✅ Threat Analytics Dashboard
+
+✅ Watchlist Management
+
+✅ Security Reports & Exports
+
+✅ SOC-Oriented Investigation Workflow
 
 ---
 
 ## 📖 Overview
 
-The **Malicious IP Intelligence System** is a cybersecurity-focused web platform that enables analysts, researchers, and security teams to investigate **IPv4 addresses** using aggregated threat intelligence from multiple sources.
+The **Malicious IP Intelligence System** is a cybersecurity-focused web platform designed to help analysts, researchers, students, and security teams investigate suspicious IPv4 addresses using aggregated threat intelligence from multiple intelligence providers.
+
+The platform combines threat intelligence, risk scoring, threat classification, reporting, and investigation workflows into a single interface, helping users identify potentially malicious infrastructure and make informed security decisions.
 
 ### ✨ Key Capabilities
 
-🔍 **Single IP Investigation**
+### 🔍 Single IP Investigation
 
 * Risk Score Analysis
 * Threat Classification
 * Analyst-Style Diagnosis
-* Recommended Response Playbooks
+* Security Recommendations
+* Investigation Playbooks
 
-📂 **Bulk IP Analysis**
+### 📂 Bulk IP Analysis
 
 * Upload `.csv`, `.txt`, and `.log` files
 * Automatic IPv4 Extraction
-* Deduplication Engine
-* Batch Threat Intelligence Analysis
+* Duplicate Removal
+* Batch Threat Intelligence Processing
+* Bulk Reporting
 
-⚡ **Intelligence Caching**
+### ⚡ Intelligence Caching
 
 * Cache-First Threat Intelligence Retrieval
-* 24-Hour TTL
-* Reduced Vendor API Calls
-* Faster Investigations
+* Automatic Cache Expiration (24 Hours)
+* Reduced Vendor API Usage
+* Consistent Investigation Results
+* Faster Analysis Performance
 
-📊 **Security Operations Features**
+### 📊 Security Operations Features
 
-* Watchlist Management
-* Investigation History
 * Threat Analytics Dashboard
-* Report Generation & Export
+* Investigation History
+* Watchlist Monitoring
+* Threat Classification
+* Security Reporting
 
-📄 **Reporting**
+### 📄 Reporting & Exports
 
 * TXT Reports
-* CSV Exports
-* Print-Optimized HTML/PDF Reports
+* CSV Reports
+* PDF-Friendly HTML Reports
+* Investigation Summaries
 
-> 🚀 Runs out-of-the-box in **Mock Mode** (No API Keys Required). Switch to **Live Mode** for real-time intelligence from VirusTotal and AbuseIPDB.
+> 🛡️ Runs out-of-the-box in Mock Mode (No API Keys Required). Enable Live Mode to retrieve real-time threat intelligence from VirusTotal and AbuseIPDB.
 
 ---
 
-## 🖥️ Screens
+## 🏗️ Architecture
+
+```text
+User Investigation Request
+            │
+            ▼
+ Threat Intelligence Cache
+            │
+   ┌────────┴────────┐
+   ▼                 ▼
+VirusTotal      AbuseIPDB
+   │                 │
+   └────────┬────────┘
+            ▼
+   Risk Scoring Engine
+            ▼
+ Threat Classification
+            ▼
+ Dashboard & Reports
+```
+
+---
+
+## 🖥️ Application Modules
 
 * 🏠 Landing Page
 * 🔐 Login & Registration
@@ -66,7 +130,7 @@ The **Malicious IP Intelligence System** is a cybersecurity-focused web platform
 * ⭐ Watchlist Management
 * 🕒 Investigation History
 * 📄 Reports & Exports
-* 👤 Profile & Settings
+* 👤 User Profile & Settings
 
 ---
 
@@ -84,7 +148,7 @@ The **Malicious IP Intelligence System** is a cybersecurity-focused web platform
 * ⚡ JavaScript
 * 📊 Chart.js
 
-### APIs & Intelligence Sources
+### APIs & Threat Intelligence Sources
 
 * 🛡️ VirusTotal API
 * 🚨 AbuseIPDB API
@@ -96,40 +160,17 @@ The **Malicious IP Intelligence System** is a cybersecurity-focused web platform
 
 ### Storage
 
-* 🗄️ CSV-Based Database
+* 🗄️ CSV-Based Storage Engine
 
 ### Reporting
 
-* 📄 Custom Report Generator
+* 📄 Custom Report Generation System
 
----
+### Development Tools
 
-## ⚡ Quick Start
-
-### 1️⃣ Create Virtual Environment
-
-```bat
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-### 2️⃣ Install Dependencies
-
-```bat
-pip install -r requirements.txt
-```
-
-### 3️⃣ Run Application
-
-```bat
-python app.py
-```
-
-🌐 Open:
-
-```text
-http://localhost:5000
-```
+* 💻 VS Code
+* 🔧 Git
+* 📂 GitHub
 
 ---
 
@@ -138,15 +179,15 @@ http://localhost:5000
 ### 🗄️ Cache-First Retrieval
 
 * Cache Location: `database/threat_intel_cache.csv`
-* Cache TTL: **24 Hours**
+* Cache Duration: **24 Hours**
 * Automatic Refresh on Expiration
-* Consistent Results for Repeated Investigations
+* Consistent Results Across Repeated Investigations
 
 ### 🧪 Mock Mode
 
 * No API Keys Required
-* Deterministic Threat Intelligence
-* Consistent Output for Testing
+* Deterministic Threat Intelligence Data
+* Ideal for Testing & Demonstrations
 
 ### 🌍 Live Mode
 
@@ -155,6 +196,8 @@ Real-Time Intelligence Sources:
 * 🛡️ VirusTotal
 * 🚨 AbuseIPDB
 * 🌐 ip-api.com
+
+If a provider becomes unavailable, the platform gracefully falls back to available intelligence sources.
 
 ---
 
@@ -184,17 +227,17 @@ Real-Time Intelligence Sources:
 
 2️⃣ Extract IPv4 Addresses
 
-3️⃣ Remove Duplicates
+3️⃣ Remove Duplicate IPs
 
-4️⃣ Analyze Threat Intelligence
+4️⃣ Perform Threat Intelligence Analysis
 
-5️⃣ Aggregate Results
+5️⃣ Aggregate Investigation Results
 
 6️⃣ Generate Reports
 
 ---
 
-## ⭐ Watchlist & History
+## ⭐ Watchlist & Investigation History
 
 ### Watchlist
 
@@ -204,9 +247,10 @@ Real-Time Intelligence Sources:
 
 ### Investigation History
 
-* 🕒 Complete Audit Trail
+* 🕒 Investigation Audit Trail
 * 📊 Risk Score Tracking
-* 🔍 Investigation Metadata
+* 🔍 Threat Metadata Storage
+* 📁 Historical Search Records
 
 ---
 
@@ -214,28 +258,57 @@ Real-Time Intelligence Sources:
 
 ### Individual Reports
 
-* 📄 TXT Security Reports
-* 🖨️ PDF-Ready HTML Reports
+* 📄 TXT Investigation Reports
+* 🖨️ PDF-Friendly HTML Reports
 
 ### Bulk Reports
 
 * 📊 CSV Exports
 * 📑 TXT Summaries
-* 📄 PDF Audit Reports
+* 📄 Bulk Audit Reports
 
 ---
 
-## 🧪 Testing
+## ⚡ Quick Start
 
-Run:
+### 1️⃣ Create a Virtual Environment
+
+```bat
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+### 2️⃣ Install Dependencies
+
+```bat
+pip install -r requirements.txt
+```
+
+### 3️⃣ Run the Application
+
+```bat
+python app.py
+```
+
+🌐 Open in your browser:
+
+```text
+http://localhost:5000
+```
+
+---
+
+## 🧪 Run Tests
+
+Validate the core functionality of the platform:
 
 ```bat
 python test_pipeline.py
 ```
 
-### Validates
+### Tests Covered
 
-✅ Authentication
+✅ User Authentication
 
 ✅ Threat Intelligence Pipeline
 
@@ -245,26 +318,48 @@ python test_pipeline.py
 
 ✅ Report Generation
 
+✅ Investigation Workflow
+
+---
+
+## 📌 Available Modes
+
+### 🧪 Mock Mode
+
+* No API Keys Required
+* Deterministic Threat Intelligence Data
+* Ideal for Testing & Demonstrations
+
+### 🌍 Live Mode
+
+* VirusTotal Integration
+* AbuseIPDB Integration
+* Real-Time Threat Intelligence
+* Automatic Cache Management
+
 ---
 
 ## ⚠️ Known Limitations
 
-* IPv4 Only
-* CSV Storage Not Designed for High Concurrency
-* External API Availability Affects Live Mode
+* IPv4 Support Only
+* CSV Storage Is Intended for Demonstration Purposes
+* Live Intelligence Depends on External API Availability
+* Enterprise-Scale Storage Is Not Yet Implemented
 
 ---
 
-## 🚀 Future Enhancements
+## 🚀 Future Roadmap
 
 * 🌐 IPv6 Support
-* 🗄️ SQLite / PostgreSQL Migration
-* 🔔 Automated Watchlist Re-Scanning
-* 📧 Email Alerting
+* 🗄️ SQLite Integration
+* 🐘 PostgreSQL Migration
+* 🔔 Automated Threat Re-Scanning
+* 📧 Email Notifications
 * 📡 SIEM Integration
-* 👥 RBAC Support
-* 🗺️ Geo-Location Mapping
+* 👥 Role-Based Access Control (RBAC)
+* 🗺️ Threat Geolocation Mapping
 * 🐳 Docker Deployment
+* 🤖 Machine Learning-Based Threat Prediction
 
 ---
 
@@ -276,7 +371,11 @@ python test_pipeline.py
 
 🎓 B.Tech Computer Science & Engineering
 
-🚀 Building Innovative Solutions in Cybersecurity, Threat Intelligence, Collaboration, and Technology
+🛡️ SOC & Threat Intelligence Learner
+
+🤖 Generative AI & Cybersecurity Projects
+
+🚀 Building Innovative Solutions in Cybersecurity, Collaboration, and Technology
 
 ---
 
@@ -288,4 +387,6 @@ python test_pipeline.py
 
 ## 📜 License
 
-© All Rights Reserved. This project is proprietary software and may not be copied, modified, or distributed without permission.
+© All Rights Reserved.
+
+This project is proprietary software. Unauthorized copying, modification, distribution, or commercial use is prohibited without explicit permission from the author.
