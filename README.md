@@ -387,6 +387,4 @@ python test_pipeline.py
 
 ## 📜 License
 
-© All Rights Reserved.
-
-This project is proprietary software. Unauthorized copying, modification, distribution, or commercial use is prohibited without explicit permission from the author.
+This project is licensed under the MIT License. See the LICENSE file for details.
